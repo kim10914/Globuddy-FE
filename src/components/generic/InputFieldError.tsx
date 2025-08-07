@@ -1,4 +1,5 @@
 // 인풋필드의 에러를 띄우는 컴포넌트
+// 메시지, 스타일 타입, 보이기 옵션을 인수로 받음
 import { clsx } from 'clsx'
 import type { CommonVariant, VariantStyleMap } from '../../types'
 
