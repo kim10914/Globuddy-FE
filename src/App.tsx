@@ -10,7 +10,7 @@ function App() {
       <Route
         path=""
         element={
-          islogin ? (
+          islogin ? ( //로그인 상태시 접근 가능 페이지들 입니다
             <Routes>
               <Route></Route>
             </Routes>
