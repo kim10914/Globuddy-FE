@@ -1,14 +1,14 @@
-import { useState } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 
 function App() {
-  const [islogin, setIslogin] = useState(false); //로그인 상태 저장 state
+  const islogin: boolean = false;
 
   return (
     <Routes>
       <Route path="/" element={<div>홈</div>} />
+      <Route path="/login" element={<div>로그인</div>} />
       <Route
-        path=""
+        path="/*"
         element={
           islogin ? ( //로그인 상태시 접근 가능 페이지들 입니다
             <Routes>
