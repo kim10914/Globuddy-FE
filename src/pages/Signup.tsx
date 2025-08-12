@@ -1,3 +1,4 @@
+//로그인 및 회원가입 페이지 입니다
 import Button from "../components/generic/Button";
 import { onGoogleLoginClick } from "../utils/google-login/googleAuthUtil";
 
