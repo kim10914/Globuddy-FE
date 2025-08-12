@@ -1,3 +1,4 @@
+//구글 로그인 후 콜백 페이지 입니다
 import { useEffect } from "react";
 import { googleAuthLoginApi } from "../api";
 import { useNavigate } from "react-router-dom";
