@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
-import AuthCallback from "./utils/google-login/authCallbackHandler";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 
 function App() {
   const islogin: boolean = false;
@@ -9,7 +9,7 @@ function App() {
     <Routes>
       <Route path="/" element={<div>홈</div>} />
       <Route path="/login" element={<Signup />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route
         path="/*"
         element={
