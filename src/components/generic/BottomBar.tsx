@@ -53,7 +53,7 @@ const BottomBarItem = ({ to, icon, toggleIcon, label }: BottomBarItemProps) => {
 
 export default function BottomBar() {
     return (
-        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[40px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] ">
+        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[30px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] ">
             <BottomBarItem to="/" icon={HomeIcon} toggleIcon={ToggleHome} label="Home" />
             <BottomBarItem to="/road-map" icon={Roadmap} toggleIcon={ToggleRoadmap} label="path" />
             <BottomBarItem to="/community" icon={Community} toggleIcon={ToggleCommunity} label="Community" />
