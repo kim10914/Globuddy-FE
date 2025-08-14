@@ -8,9 +8,5 @@ body {
 
 /* 기본 뷰포트 */
 .app-viewport {
-    @apply w-[390px] min-h-[844px] mx-auto overflow-auto bg-black relative;
-}
-/* 하단 바 가 선택되었을 경우 */
-.bottomBarStyle{
-    @apply cursor-pointer text-[#82898F] hover:text-[#0085FF] hover:fill-[#0078E6]
+    @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
 }

@@ -1,13 +1,15 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import MainPage from "./pages/MainPage";
+
 
 function App() {
   const islogin: boolean = false;
 
   return (
     <Routes>
-      <Route path="/" element={<div>홈</div>} />
+      <Route path="/" element={<MainPage/>} />
       <Route path="/login" element={<Signup />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route
