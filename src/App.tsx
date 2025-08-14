@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
+import Community from "./pages/community/Community";
 
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     <Routes>
       <Route path="/" element={<MainPage/>} />
       <Route path="/login" element={<Signup />} />
+      <Route path="/community" element={<Community />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route
         path="/*"
