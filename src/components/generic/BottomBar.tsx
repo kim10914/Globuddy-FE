@@ -17,6 +17,18 @@ type BottomBarItemProps = {
     toggleIcon: string;
     label: string;
 };
+
+export default function BottomBar() {
+    return (
+        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[30px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] absolute bottom-0 z-10 ">
+            <BottomBarItem to="/" icon={HomeIcon} toggleIcon={ToggleHome} label="Home" />
+            <BottomBarItem to="/road-map" icon={Roadmap} toggleIcon={ToggleRoadmap} label="path" />
+            <BottomBarItem to="/community" icon={Community} toggleIcon={ToggleCommunity} label="Community" />
+            <BottomBarItem to="/profile" icon={Mypage} toggleIcon={ToggleMypage} label="profile" />
+        </div>
+    )
+}
+
 /** 아이템 링크 생성
  * @param {string} to 경로
  * @param {string} icon 평소 아이콘 
@@ -36,7 +48,7 @@ const BottomBarItem = ({ to, icon, toggleIcon, label }: BottomBarItemProps) => {
         >
             {({ isActive }) => {
                 const showToggle = isActive || isHovered || isClicked; // 활성/hover 시 토글 아이콘
-                const textClass = showToggle ? "text-[#0085FF]" : "text-[#82898F]"; // 활성/hover 시 텍스트 색
+                const textClass = showToggle ? "text-[#0085FF]" : "text-[#82898F]"; // 활성/hover 시 텍스트 색 변경
                 return (
                     <>
                         <img
@@ -49,15 +61,4 @@ const BottomBarItem = ({ to, icon, toggleIcon, label }: BottomBarItemProps) => {
             }}
         </NavLink>
     );
-}
-
-export default function BottomBar() {
-    return (
-        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[30px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] ">
-            <BottomBarItem to="/" icon={HomeIcon} toggleIcon={ToggleHome} label="Home" />
-            <BottomBarItem to="/road-map" icon={Roadmap} toggleIcon={ToggleRoadmap} label="path" />
-            <BottomBarItem to="/community" icon={Community} toggleIcon={ToggleCommunity} label="Community" />
-            <BottomBarItem to="/profile" icon={Mypage} toggleIcon={ToggleMypage} label="profile" />
-        </div>
-    )
 }
