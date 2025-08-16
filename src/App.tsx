@@ -3,6 +3,8 @@ import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
 import Community from "./pages/community/Community";
+import CommunityCategory from "./pages/community/CommunityCategory";
+import CommunityPost from "./pages/community/CommunityPost";
 
 
 function App() {
@@ -14,6 +16,8 @@ function App() {
       <Route path="/login" element={<Signup />} />
       <Route path="/community" element={<Community />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/board/:category" element={<CommunityCategory />} />
+      <Route path="/board/:category/:postId" element={<CommunityPost />} />
       <Route
         path="/*"
         element={

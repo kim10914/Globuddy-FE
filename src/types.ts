@@ -17,3 +17,11 @@ export type Post = {
     likes: number;
     comments: number;   // 0이면 댓글 영역 비노출
 };
+/** 게시판 타입 */
+export type CategorySlug =
+    | 'general'
+    | 'campus-life'
+    | 'work-life'
+    | 'visa-tips'
+    | 'marketplace'
+    | 'qna';

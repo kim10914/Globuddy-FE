@@ -1,26 +1,32 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Post } from '../../types'
 
 import Heart from '../../assets/community/좋아요.svg'
 import ClickHeart from '../../assets/community/클릭좋아요.svg'
 import Message from '../../assets/community/메시지.svg'
 import CardOption from '../../assets/community/옵션.svg'
+import { BOARD_CATEGORIES } from './data'
 /**
  * 게시글 카드에서 사용하는 프로퍼티
  * - Post의 필드에 화면 옵션을 추가
  */
 type CommunityPostCardProps = Post & {
-    showMenu?: boolean;                 // 내 글 화면 등에서 우측 상단 메뉴 노출
+    showMenu?: boolean; // 내 글 화면 등에서 우측 상단 메뉴 노출
     onMenuClick?: (id: Post["id"]) => void; // 메뉴 클릭 콜백(옵션)
+    disableNavigation?: boolean; // 링크 이동 활성화
 };
 
 /**
  * 커뮤니티 게시글 카드 컴포넌트
  * @param {CommunityPostCardProps} props 카드 렌더링 데이터 및 옵션
+ * @param {boolean} disableNavigation 카드 링크 옵션 true = 비활성화
  * @returns {JSX.Element} 게시글 카드 UI
  */
-export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, likes, comments, showMenu = false, onMenuClick, }: CommunityPostCardProps) => {
+export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, likes, comments, showMenu = false, onMenuClick, disableNavigation = false,}: CommunityPostCardProps) => {
     const [likeState, setLikeState] = useState({ isLiked: false, count: likes }); // 좋아요 표시
+    const category = BOARD_CATEGORIES[0].label;
+    const navigate = useNavigate();
 
     /** 좋아요 버튼 토글 핸들러 (아이콘 전환 + 카운트 증감) */
     const handleToggleLike = () => {
@@ -29,9 +35,15 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
             count: prev.count + (prev.isLiked ? -1 : 1),
         }));
     };
-
+    /** 카드 클릭 핸들러 */
+    const handleClick = () => {
+        if (!disableNavigation) {
+            navigate(`/board/${category}/${id}`);
+        }
+    };
     return (
-        <div className="w-[350px] flex flex-col gap-[19px] p-[16px] rounded-[6px] bg-white prop-shadow">
+        <div onClick={handleClick}
+            className="w-[350px] flex flex-col gap-[19px] p-[16px] rounded-[6px] bg-white prop-shadow z-10">
             {/* 유저 프로필 부분 */}
             <div className="flex gap-[16px] relative">
                 <img src={avatar} alt="" className='h-[44px] w-[44px] bg-[#D9D9D9] rounded-[4px] ' />
