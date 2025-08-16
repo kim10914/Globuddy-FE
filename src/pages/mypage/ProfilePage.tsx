@@ -1,7 +1,9 @@
+import { useState } from "react";
 import Logout from "../../components/generic/mypage/Logout";
 import MyPageNav from "../../components/generic/mypage/MyPageNav";
 
 export default function ProfilePage() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   return (
     <div className="absolute inset-0 w-full h-full bg-black">
       <h1 className="text-black p-4">my-page</h1>
@@ -17,8 +19,12 @@ export default function ProfilePage() {
         {/*이마지로 변경*/}
       </div>
       <main>
-        <MyPageNav />
-        <Logout />
+        <MyPageNav setShowLogoutModal={setShowLogoutModal} />
+        {showLogoutModal ? (
+          <Logout setShowLogoutModal={setShowLogoutModal} />
+        ) : (
+          <></>
+        )}
       </main>
     </div>
   );
