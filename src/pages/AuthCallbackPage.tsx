@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
         return;
       }
       const response = await googleAuthLoginApi(code);
-      if (response.ok) {
+      if (response.success) {
         // 로그인 성공 처리
         navigate("/");
       } else {

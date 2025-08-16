@@ -18,4 +18,5 @@ body {
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+  @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
 }
