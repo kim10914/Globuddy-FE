@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import Smile from '../../../assets/community/스마일.svg'
 import Clip from '../../../assets/community/클립.svg'
