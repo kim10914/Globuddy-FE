@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import MyPageButton from "./MyPageButton";
-import notiIcon from "../../../assets/mypage/Notifications.png";
-import chatIcon from "../../../assets/mypage/mychatting.png";
-import commuIcon from "../../../assets/mypage/mycommunity.png";
-import settingIcon from "../../../assets/mypage/setting.png";
-import logOutIcon from "../../../assets/mypage/logout.png";
+import notiIcon from "../../assets/mypage/notifications.png";
+import chatIcon from "../../assets/mypage/mychatting.png";
+import commuIcon from "../../assets/mypage/mycommunity.png";
+import settingIcon from "../../assets/mypage/setting.png";
+import logOutIcon from "../../assets/mypage/logout.png";
 
 export type SetShowLogoutModal = {
   setShowLogoutModal: (show: boolean) => void;
@@ -24,7 +24,7 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
           title="Notification"
           iconSrc={notiIcon}
           onClick={() => {
-            nav("/mypage/notifications");
+            nav("/profile/notifications");
           }}
         />
         <MyPageButton title="My Chatting" iconSrc={chatIcon} />
@@ -32,7 +32,7 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
         <MyPageButton
           title="Setting"
           onClick={() => {
-            nav("/mypage/setting");
+            nav("/profile/setting");
           }}
           iconSrc={settingIcon}
         />

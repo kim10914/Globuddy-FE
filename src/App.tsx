@@ -1,6 +1,8 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import MainPage from "./pages/MainPage";
+
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
@@ -10,7 +12,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<div>홈</div>} />
+      <Route path="/" element={<MainPage />} />
       <Route path="/login" element={<Signup />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
       <Route
@@ -18,10 +20,10 @@ function App() {
         element={
           islogin ? ( //로그인 상태시 접근 가능 페이지들 입니다
             <Routes>
-              <Route path="/mypage" element={<ProfilePage />}></Route>
-              <Route path="/mypage/setting" element={<SettingPage />}></Route>
+              <Route path="/profile" element={<ProfilePage />}></Route>
+              <Route path="/profile/setting" element={<SettingPage />}></Route>
               <Route
-                path="/mypage/notifications"
+                path="/profile/notifications"
                 element={<NotificationsPage />}
               ></Route>
             </Routes>

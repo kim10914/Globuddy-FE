@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import MyPageSettingMain from "../../components/generic/mypage/MyPageSettingMain";
+import MyPageSettingMain from "../../components/mypage/MyPageSettingMain";
 
 export default function NotificationsPage() {
   const nav = useNavigate();

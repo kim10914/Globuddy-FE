@@ -1,8 +1,11 @@
+//프로필 페이지 메인 입니다
+
 import { useState, useRef } from "react";
 import type { ChangeEvent } from "react";
-import Logout from "../../components/generic/mypage/Logout";
-import MyPageNav from "../../components/generic/mypage/MyPageNav";
+import Logout from "../../components/mypage/Logout";
+import MyPageNav from "../../components/mypage/MyPageNav";
 import editIcon from "../../assets/mypage/editprofile.png";
+import BottomBar from "../../components/generic/BottomBar";
 
 export default function ProfilePage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -10,6 +13,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    //프로필 이미지
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -64,6 +68,9 @@ export default function ProfilePage() {
           <></>
         )}
       </main>
+      <footer>
+        <BottomBar />
+      </footer>
     </div>
   );
 }
