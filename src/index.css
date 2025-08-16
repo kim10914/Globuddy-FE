@@ -13,9 +13,17 @@ body {
 
 /* 스크롤 바 숨기기 */
 .hide-scrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  -ms-overflow-style: none;    /* IE/Edge */
+  scrollbar-width: none;       /* Firefox */
 }
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;               /* Chrome/Safari */
+}
+
+@layer utilities {
+  .prop-shadow {
+    box-shadow:
+      0 2px 6px rgba(16, 24, 40, 0.06),
+      0 16px 40px rgba(71, 81, 89, 0.14);
+  }
 }

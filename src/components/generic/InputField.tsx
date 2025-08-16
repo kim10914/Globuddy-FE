@@ -10,7 +10,6 @@ type InputFieldProps = {
 export default function InputField({ variant, ...props }: InputFieldProps) {
   const variantStyle: VariantStyleMap = {
     generic: "", // 일반적인 InputField 스타일
-    modifyPage: "", // 00 페이지 전용 스타일
   };
   return (
     <div>

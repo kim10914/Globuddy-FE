@@ -1,11 +1,18 @@
+import CommunityMain from "../../components/community/CommunityMain"
 import BottomBar from "../../components/generic/BottomBar"
 
-export default function Community(){
-    return(
+export default function Community() {
+    return (
         <div>
-            커뮤니티
+            <header className="text-[20px] text-[#1D2939] font-medium my-[25px] pl-[25px] ">
+                {/* 국가는 변수로 받기 */}
+                <p>Korea</p>
+            </header>
+            <div className="overflow-visible">
+                <CommunityMain />
+            </div>
             <footer>
-                <BottomBar/>
+                <BottomBar />
             </footer>
         </div>
     )
