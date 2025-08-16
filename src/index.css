@@ -2,5 +2,5 @@
 
 /* 기본 뷰포트 */
 .app-viewport {
-    @apply w-[390px] min-h-[844px] mx-auto overflow-auto bg-black relative;
+  @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
 }
