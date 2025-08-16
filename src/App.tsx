@@ -2,16 +2,17 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
-
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
+
 
 function App() {
   const islogin: boolean = true;
 
   return (
     <Routes>
+
       <Route path="/" element={<MainPage />} />
       <Route path="/login" element={<Signup />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
