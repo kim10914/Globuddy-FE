@@ -1,5 +1,6 @@
 import type { Post, CategoryKey } from "../../types";
 import { CategoryInfo } from "../../types";
+import User1 from '../../assets/roadmap/유저1.svg'
 
 // 라우트 path 유틸(중복 문자열 방지)
 const categoryPath = (slug: CategoryKey) => `/board/${slug}`;
@@ -19,7 +20,7 @@ export type PostWithCategory = Post & { category: CategoryKey };
 export const DUMMY_POSTS: PostWithCategory[] = [
     {
         id: 1,
-        avatar: "/assets/users/u1.png",
+        avatar: User1,
         nickname: "Ivan",
         createdAt: "May 21, 2022",
         content:
@@ -30,7 +31,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
     },
     {
         id: 2,
-        avatar: "/assets/users/u2.png",
+        avatar: User1,
         nickname: "Sora",
         createdAt: "Aug 10, 2022",
         content: "학식 맛집 추천 좀요 ",
@@ -40,7 +41,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
     },
     {
         id: 3,
-        avatar: "/assets/users/u3.png",
+        avatar: User1,
         nickname: "Min",
         createdAt: "Jan 02, 2023",
         content: "비자 연장 시 체크리스트 공유합니다.",
@@ -50,7 +51,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
     },
     {
         id: 4,
-        avatar: "/assets/users/u4.png",
+        avatar: User1,
         nickname: "Lena",
         createdAt: "Mar 15, 2023",
         content: "중고 노트북 판매해요. 상태 최상.",
@@ -60,7 +61,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
     },
     {
         id: 5,
-        avatar: "/assets/users/u5.png",
+        avatar: User1,
         nickname: "Jay",
         createdAt: "Sep 12, 2023",
         content: "회사 점심 추천 리스트 업데이트!",
@@ -70,7 +71,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
     },
     {
         id: 6,
-        avatar: "/assets/users/u6.png",
+        avatar: User1,
         nickname: "Ivan",
         createdAt: "May 21, 2022",
         content:

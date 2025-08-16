@@ -4,6 +4,7 @@ import type {
   PatchRoadmapVisaRequest,
   PatchRoadmapVisaResponse,
   PatchRoadmapByIdResponse,
+  RoadmapSection2Item,
 } from "./types";
 
 const API_BASE_URL =
@@ -174,22 +175,31 @@ export async function patchRoadmapVisaApi(
   );
   return res.data;
 }
-/** 비자 로드맵 선택/설정(PATCH /roadmap/{visaId}) */
-export async function patchRoadmapByIdApi(
-  visaId: number | string, // path parameter
-  options?: { signal?: AbortSignal } // 요청 취소/타임아웃 제어 (선택)
+// GET /roadmap/{visaId} 비자 정보 GET
+export async function getRoadmapByIdApi(
+  visaId: number | string,
+  options?: { signal?: AbortSignal }
 ): Promise<PatchRoadmapByIdResponse> {
-  // 응답 타입
-  // request header에 토큰 필수 -> 인터셉터가 넣지만 사전 검증
-  const token = getAccessToken();
-  if (!token) {
-    throw new Error("인증 토큰이 없습니다. 로그인 후 다시 시도하세요.");
-  }
   const res = await retryRequest(() =>
-    apiClient.patch<PatchRoadmapByIdResponse>(`/roadmap/${visaId}`, null, {
-      signal: options?.signal,
-    })
+    apiClient.get(`/roadmap/${visaId}`, { signal: options?.signal })
   );
 
-  return res.data;
+  // 응답 키 표준화(서버가 'visaid'로 내려줄 가능성도 있어 보정)
+  const raw = res.data ?? {};
+  const normalized: PatchRoadmapByIdResponse = {
+    visaId: raw.visaId ?? raw.visaid ?? Number(visaId),
+    description: raw.description ?? "",
+    section1: Array.isArray(raw.section1) ? raw.section1 : [],
+    section2: Array.isArray(raw.section2)
+      ? raw.section2.map(
+          (it: any): RoadmapSection2Item => ({
+            subtitle: it?.subtitle ?? "",
+            content: Array.isArray(it?.content) ? it.content : [],
+          })
+        )
+      : [],
+    section3: Array.isArray(raw.section3) ? raw.section3 : [],
+  };
+
+  return normalized;
 }

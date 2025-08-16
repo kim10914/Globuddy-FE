@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import VisaList, { type VisaItem } from "../../components/roadmap/visa-search/VisaList";
 import ReviewsList from "../../components/roadmap/visa-search/ReviewsList";
-import USA1 from '../../assets/roadmap/Rectangle2.svg'
+import { getVisaItems, getDefaultVisaId } from "../../components/roadmap/data";
+import USA1 from "../../assets/roadmap/Rectangle2.svg";
+import User1 from '../../assets/roadmap/유저1.svg'
+import leftArrow from '../../assets/roadmap/arrow-left.svg'
 
-// 국가 정보 더미 (이미지/설명; 실제로는 서버/상위에서 주입 권장)
 const countryMeta: Record<string, { name: string; hero: string; desc: string }> = {
     usa: {
         name: "USA",
@@ -32,46 +34,43 @@ const countryMeta: Record<string, { name: string; hero: string; desc: string }> 
     },
 };
 
+
 export default function VisaSearch() {
     const navigate = useNavigate();
     const { country } = useParams<{ country: string }>();
+    const slug = (country ?? "").toLowerCase();
+
+    const visaItems: VisaItem[] = useMemo(() => getVisaItems(slug), [slug]); // 국가별 비자 목록 계산
 
     const meta = useMemo(() => {
-        const key = (country ?? "").toLowerCase();
-        return countryMeta[key] ?? {
-            name: country ?? "Unknown",
-            hero: "/assets/hero/default.jpg",
-            desc: "",
-        };
-    }, [country]);
+        return (
+            countryMeta[slug] ?? {
+                name: country ?? "Unknown",
+                hero: "/assets/hero/default.jpg",
+                desc: "",
+            }
+        );
+    }, [slug, country]);
 
-    // 선택된 비자
-    const [selectedVisa, setSelectedVisa] = useState<VisaItem["id"] | undefined>("");
+    // 기본 선택값: 국가가 바뀌거나 목록이 갱신되면 첫 항목으로 초기화
+    const [selectedVisa, setSelectedVisa] = useState<VisaItem["id"] | undefined>(() => getDefaultVisaId(slug));
 
-    // Visa 선택 시 즉시 로드맵 작성 페이지 이동
-    const handleVisaChange = (id: VisaItem["id"], label: string) => {
-        setSelectedVisa(id); // 내부 상태는 유지
-        const countrySlug = (country ?? "").toLowerCase();
-        // 쿼리 파라미터로 전달 (필요 시 path param으로 변경 가능)
-        navigate(`/roadmap/write?country=${encodeURIComponent(countrySlug)}&visa=${encodeURIComponent(String(id))}`);
+    useEffect(() => {
+        setSelectedVisa(getDefaultVisaId(slug));
+    }, [slug, visaItems]);
+    /** Visa 선택 시 즉시 로드맵 작성 페이지 이동 */
+    const handleVisaChange = (id: VisaItem["id"], label: string) => { // label까지 수신
+        setSelectedVisa(id);
+        // label도 함께 전달(작성 페이지 타이틀 등에 활용)
+        navigate(
+            `/road-map/write?country=${encodeURIComponent(slug)}&visa=${encodeURIComponent(String(id))}&label=${encodeURIComponent(label)}`
+        );
     };
-
-    // Visa 버튼 목록 (이미지 예시와 동일)
-    const visaItems: VisaItem[] = useMemo(
-        () => [
-            { id: "ESTA", label: "ESTA" },
-            { id: "F1", label: "F1" },
-            { id: "J1", label: "J1" },
-            { id: "J-1", label: "" },
-            { id: "etc2", label: "." },
-        ],
-        []
-    );
 
     const reviews = [
         {
             id: "rv-1",
-            avatar: "/assets/users/ivan.png",
+            avatar: User1,
             name: "Ivan",
             date: "May 21, 2022",
             rating: 5,
@@ -88,6 +87,13 @@ export default function VisaSearch() {
                     alt={`${meta.name}`}
                     className="w-full h-[243px] object-cover rounded-b-[8px] bg-black"
                 />
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="absolute top-[24px] left-[24px] z-10"
+                >
+                    <img src={leftArrow} alt="<-" />
+                </button>
                 {/* 국가명 + 설명 */}
                 <section className="px-[20px] py-[24px] rounded-b-[13px] bg-white">
                     <h2 className="text-[18px] font-semibold text-[#1D2939] mb-[16px]">{meta.name}</h2>
@@ -100,10 +106,8 @@ export default function VisaSearch() {
                 selectedId={selectedVisa}
                 onChange={handleVisaChange}
             />
-            <section>
-                {/* reviews 섹션 */}
-                <ReviewsList items={reviews} />
-            </section>
+            {/* reviews 섹션 */}
+            <ReviewsList items={reviews} />
             <div className="roadmapGradient fixed bottom-0 left-0 right-0 h-[120px] pointer-events-none z-20" />
         </main>
     );

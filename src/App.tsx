@@ -14,6 +14,7 @@ import LoadingPage from "./pages/LoadingPage";
 import CommunityMyPost from "./pages/community/CommunityMyPost";
 import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
 import VisaSearch from "./pages/roadmap/VisaSearch";
+import VisaInfo from "./pages/roadmap/VisaInfo";
 
 function App() {
   const islogin: boolean = true;
@@ -33,6 +34,7 @@ function App() {
       <Route path="/board/:category/mine" element={<CommunityMyPost />} />
       <Route path="/road-map" element={<RoadmapFlights />} />
       <Route path="/visa/:country" element={<VisaSearch />} />
+      <Route path="/road-map/write" element={<VisaInfo />} />
       <Route
         path="/*"
         element={

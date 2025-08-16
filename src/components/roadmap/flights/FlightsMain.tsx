@@ -5,14 +5,17 @@ import LocationModal from "./LocationModal";
 import LocationIcon from "../../../assets/roadmap/위치.svg";
 import { patchRoadmapVisaApi } from "../../../api";
 
-const countryMap: Record<
-    string,
-    { code: string; slug: string }
-> = {
+type PickItem = { name: string; hashtags: string[] };
+
+const countryMap: Record<string, { code: string; slug: string }> = {
     "United States of America": { code: "US", slug: "usa" },
+    USA: { code: "US", slug: "usa" },
     China: { code: "CN", slug: "chn" },
     Japan: { code: "JP", slug: "jpn" },
+    Canada: { code: "CA", slug: "cnd" },
 };
+
+const toSlug = (name: string) => name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-");
 
 export default function FlightsMain() {
     const navigate = useNavigate();
@@ -24,7 +27,7 @@ export default function FlightsMain() {
     const closeModal = () => setIsModalOpen(false);
 
     // 국가 선택 시 서버에 country 설정(PATCH) 후 /visa/:countrySlug 로 이동
-    const handleSelectLocation = async (item: { name: string; hashtags: string[] }) => {
+    const handleSelectLocation = async (item: PickItem) => {
         if (submitting) return;
         setSubmitting(true);
 
@@ -32,17 +35,17 @@ export default function FlightsMain() {
         closeModal();
 
         // 매핑에서 코드/슬러그 찾기 (없으면 안전한 fallback)
-        const info = countryMap[item.name];
-        const countryCode = info?.code;
-        const countrySlug =
-            info?.slug ?? item.name.toLowerCase().replace(/\s+/g, "-");
+        const match = countryMap[item.name];
+        const countryCode = match?.code;
+        const countrySlug = match?.slug ?? toSlug(item.name);
+
 
         try {
             if (countryCode) {
-                await patchRoadmapVisaApi({ country: countryCode }); // API 호출
+                await patchRoadmapVisaApi({ country: countryCode });
             }
         } catch (e) {
-            // 서버 설정이 실패해도 페이징은 진행 (로그만 남김)
+            // 서버 설정 실패해도 라우팅은 진행
             console.error("patchRoadmapVisaApi failed:", e);
         } finally {
             setSubmitting(false);
@@ -61,7 +64,7 @@ export default function FlightsMain() {
             {/* Where to? 입력 영역 (클릭 시 모달 오픈) */}
             <button
                 type="button"
-                onClick={openModal}
+                onClick={openModal} disabled={submitting}
                 className="w-full h-14 rounded-[8px] px-3 flex items-center gap-2 prop-shadow"
             >
                 <img src={LocationIcon} alt="location" className="w-5 h-5 opacity-70" />
