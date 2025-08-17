@@ -56,7 +56,6 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
                     <button
                         type="button"
                         className="absolute right-0 top-0 px-2 py-1"
-                        aria-label="post-menu"
                         onClick={() => onMenuClick?.(id)} // 변경: 실제 id 전달
                     >
                         <img src={CardOption} alt="options" />
@@ -70,7 +69,7 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
             {/* 좋아요, 댓글 */}
             <div className="flex gap-[10px] items-center">
                 <div className="flex gap-[4px] items-center">
-                    <button type="button" aria-label="like" aria-pressed={likeState.isLiked} onClick={handleToggleLike} >
+                    <button type="button" onClick={handleToggleLike} >
                         <img src={likeState.isLiked ? ClickHeart : Heart} alt="Heart" />
                     </button>
                     <p className="text-[#82898F] text-[12px] font-normal">{likeState.count}</p>
@@ -79,7 +78,7 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
                 {/* 댓글 0개면 '안보임'*/}
                 {comments > 0 && (
                     <div className="flex gap-[4px] items-center">
-                        <button type="button" aria-label="comments">
+                        <button type="button">
                             <img src={Message} alt="Message" />
                         </button>
                         <p className="text-[#82898F] text-[12px] font-normal">{comments}</p>

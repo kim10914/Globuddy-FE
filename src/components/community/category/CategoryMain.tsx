@@ -1,33 +1,45 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import PostsList from "../PostsList";
-import type { CategorySlug } from "../data";
 import { DUMMY_POSTS } from "../data";
+import type { Post, CategoryKey } from "../../../types";
+import { CategoryInfo } from "../../../types";
 
 import SearchIcon from '../../../assets/community/검색.svg'
-import type { Post } from "../../../types";
+
 
 /**
  * (더미) 카테고리/키워드 기반 게시글 조회
  * 실제 API 연동 시 이 함수만 교체하면 됨.
  */
-const isValidCategory = (x: string): x is CategorySlug =>
-    ["general", "campus-life", "work-life", "visa-tips", "marketplace", "qna"].includes(x);
+const isValidCategory = (x: string): x is CategoryKey => {
+    return x in CategoryInfo;
+};
 /**
  * (더미) 카테고리/키워드 기반 게시글 조회
  * 실제 API 연동 시 이 함수만 교체하면 됨.
- */ 
-async function fetchPostsByCategoryAndKeyword(category: string, keyword: string): Promise<Post[]> {
+ */
+async function fetchPostsByCategoryAndKeyword(category: CategoryKey, keyword: string): Promise<Post[]> {
     // 실제 호출 예시:
     // const data = await res.json(); return data.items as Post[];
 
     // 더미 필터링
     const kw = keyword.trim().toLowerCase();
     const base = DUMMY_POSTS.filter((p) => p.category === category);
-    if (!kw) return base;
-    return base.filter(
-        (p) => p.nickname.toLowerCase().includes(kw) || p.content.toLowerCase().includes(kw)
-    );
+    const toPost = (p: typeof DUMMY_POSTS[number]): Post => {
+        const { category: _c, ...rest } = p;
+        return rest;
+    };
+
+    if (!kw) return base.map(toPost);
+
+    return base
+        .filter(
+            (p) =>
+                p.nickname.toLowerCase().includes(kw) ||
+                p.content.toLowerCase().includes(kw)
+        )
+        .map(toPost);
 }
 
 /**
@@ -45,10 +57,14 @@ export default function CategoryMain() {
     const [posts, setPosts] = useState<Post[]>([]); // 포스트
     const [loading, setLoading] = useState(false); // 로딩 상태
     const [error, setError] = useState<string | null>(null); // 에러
-
+    /** 라우트 파라미터를 안전한 CategoryKey로 고정 */
+    const categoryKey = useMemo(
+        () => (category && isValidCategory(category) ? (category as CategoryKey) : undefined),
+        [category]
+    );
     /** 검색 실행(쿼리스트링 동기화 + 목록 재조회) -> useCallback 최적화 */
     const handleSearch = useCallback(async () => {
-        if (!category || !isValidCategory(category)) return;
+        if (!categoryKey) return;
         // 쿼리스트링 동기화
         setSearchParams((prev) => {
             const next = new URLSearchParams(prev);
@@ -62,7 +78,7 @@ export default function CategoryMain() {
         try {
             setLoading(true);
             setError(null);
-            const result = await fetchPostsByCategoryAndKeyword(category, keyword);
+            const result = await fetchPostsByCategoryAndKeyword(categoryKey, keyword);
             setPosts(result);
         } catch (e) {
             setError("목록을 불러오지 못했습니다.");
@@ -70,7 +86,7 @@ export default function CategoryMain() {
             setLoading(false);
         }
     }, [category, keyword, setSearchParams]);
-    // 카테고리/URL q 변경 시 초기 로드 & 뒤로가기 대응
+    // 카테고리/URL q 변경 시 초기 로드, 뒤로가기 대응
     useEffect(() => {
         if (!category || !isValidCategory(category)) return;
         const q = searchParams.get("q") ?? "";
@@ -89,7 +105,7 @@ export default function CategoryMain() {
             }
         })();
         return () => { cancelled = true; };
-    }, [category, searchParams]);
+    }, [categoryKey, searchParams]);
 
     return (
         <main className="w-full max-w-[390px] mx-auto px-[8px]">
@@ -100,7 +116,7 @@ export default function CategoryMain() {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     placeholder="Search"
-                    className="flex-1 h-[40px] pl-[40px] pr-[12px] border border-[#D0D0D0] rounded-full text-sm w-full text-[Search]"
+                    className="flex-1 h-[40px] pl-[40px] pr-[12px] border border-[#D0D0D0] rounded-full text-sm w-full"
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     aria-label="게시글 검색"
                 />
@@ -116,7 +132,7 @@ export default function CategoryMain() {
             {!loading && !error && posts.length === 0 && (
                 <p className="text-[#98A2B3] text-sm">게시글이 없습니다.</p>
             )}
-            
+
             {!loading && !error && posts.length > 0 && (
                 <PostsList posts={posts} limit={100} />
             )}

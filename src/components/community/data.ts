@@ -1,26 +1,19 @@
-import type { Post } from "../../types";
+import type { Post, CategoryKey } from "../../types";
+import { CategoryInfo } from "../../types";
 
-// 카테고리 슬러그(라우트와 동일하게 사용)
-export type CategorySlug =
-    | "general"
-    | "campus-life"
-    | "work-life"
-    | "visa-tips"
-    | "marketplace"
-    | "qna";
+// 라우트 path 유틸(중복 문자열 방지)
+const categoryPath = (slug: CategoryKey) => `/board/${slug}`;
 
-// 게시판 링크/라벨 (라우팅/리스트 공용 사용)
-export const BOARD_CATEGORIES: { label: string; to: string; slug: CategorySlug }[] = [
-    { label: "자유 게시판", to: "/board/general", slug: "general" },
-    { label: "학교 생활 게시판", to: "/board/campus-life", slug: "campus-life" },
-    { label: "회사 생활 게시판", to: "/board/work-life", slug: "work-life" },
-    { label: "비자 팁", to: "/board/visa-tips", slug: "visa-tips" },
-    { label: "중고거래", to: "/board/marketplace", slug: "marketplace" },
-    { label: "Q&A 게시판", to: "/board/qna", slug: "qna" },
-];
+// 게시판 링크/라벨 (라우팅/리스트 공용 사용) 
+export const BOARD_CATEGORIES = (Object.entries(CategoryInfo) as [CategoryKey, { name: string; description: string }][])
+    .map(([slug, meta]) => ({
+        label: meta.name,
+        to: categoryPath(slug),
+        slug,
+    }));
 
 // 내부 전용 타입: 카테고리 필드를 포함한 더미 포스트
-export type PostWithCategory = Post & { category: CategorySlug };
+export type PostWithCategory = Post & { category: CategoryKey };
 
 // 더미 데이터(카테고리 포함) — API 나오면 대체
 export const DUMMY_POSTS: PostWithCategory[] = [
@@ -86,7 +79,7 @@ export const DUMMY_POSTS: PostWithCategory[] = [
         comments: 1,
         category: "general",
     },
-];
+] as const;
 
 // 유틸: 인기글 상위 N개 (likes DESC)
 export function getPopularPosts(limit = 4): Post[] {
@@ -99,7 +92,7 @@ export function getPopularPosts(limit = 4): Post[] {
 
 // 유틸: 카테고리 + 키워드 검색
 export function getPostsByCategoryAndKeyword(
-    category: CategorySlug,
+    category: CategoryKey,
     keyword = ""
 ): Post[] {
     const kw = keyword.trim().toLowerCase();

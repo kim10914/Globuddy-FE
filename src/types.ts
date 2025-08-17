@@ -18,10 +18,49 @@ export type Post = {
     comments: number;   // 0이면 댓글 영역 비노출
 };
 /** 게시판 타입 */
-export type CategorySlug =
-    | 'general'
-    | 'campus-life'
-    | 'work-life'
-    | 'visa-tips'
-    | 'marketplace'
-    | 'qna';
+export type CategoryKey =
+    | "general"
+    | "campus-life"
+    | "work-life"
+    | "visa-tips"
+    | "marketplace"
+    | "qna";
+/**게시판 정보 타입 */
+export type CategoryData = {
+    name: string;
+    description: string;
+    tag: string;
+};
+/** 카테고리 별 데이터 */
+export const CategoryInfo: Record<CategoryKey, CategoryData> = {
+    general: {
+        name: "자유 게시판",
+        description: "자유롭게 얘기해보세요.",
+        tag: "#비자 #비행편",
+    },
+    "campus-life": {
+        name: "학교 생활 게시판",
+        description: "학교 생활에 대하여 얘기해보세요",
+        tag: "#학식 #수강신청",
+    },
+    "work-life": {
+        name: "회사 생활 게시판",
+        description: "회사 생활에 대하여 얘기해보세요",
+        tag: "#이직 #스터디",
+    },
+    "visa-tips": {
+        name: "비자 팁",
+        description: "비자 팁에 대하여 얘기해보세요",
+        tag: "#비자 #비행편",
+    },
+    marketplace: {
+        name: "중고거래",
+        description: "중고 거래로 구하고 싶은 물건 이나 판매하고 싶은 물건을 작성해 주세요",
+        tag: "#팝니다 #삽니다",
+    },
+    qna: {
+        name: "Q&A 게시판",
+        description: "궁금한 건 모든지 얘기해보세요",
+        tag: "#무물보 #오늘의TMI",
+    },
+} as const; 

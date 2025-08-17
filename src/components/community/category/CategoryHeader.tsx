@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import Goback from '../../../assets/generic/뒤로가기.svg'
 import WritePost from '../../../assets/community/글쓰기.svg'
 
@@ -13,32 +13,34 @@ type CategoryHeaderProps = {
 /**
  * 커뮤니티 헤더
  * @param {string} category 카테고리 
- * @param {boolean} showWriteButton 글쓰기 버튼 고정? 
+ * @param {boolean} showWriteButton 글쓰기 버튼 이용(false = 보임)
  * @param {boolean} sticky 상단에 고정 
  * @returns 
  */
 export default function CategoryHeader({ category, showWriteButton = true, onBack, onWrite, sticky = false, }: CategoryHeaderProps) {
     const navigate = useNavigate();
-
+    const { category: routeCategory } = useParams<{ category: string }>();
+    const slug = routeCategory && routeCategory.length > 0 ? routeCategory : 'general';
+    /** 뒤로가기 */
     const handleGoback = () => {
         // 외부 핸들러 우선 적용
         if (onBack) return onBack();
 
         // 히스토리가 없으면 안전한 경로로 이동
         if (window.history.length <= 1) {
-            navigate("/community", { replace: true });
+            navigate('/board/general', { replace: true });
         } else {
             navigate(-1);
         }
     };
+    /** 글쓰기 페이지 이동 */
     const handleWritePost = () => {
         // 외부 핸들러 우선 적용
         if (onWrite) return onWrite();
-        navigate("/write-post");
+        navigate(`/board/${slug}/write`);
     };
     return (
-        <header className={[
-            'w-full max-w-[390px] mx-auto',
+        <header className={['w-full max-w-[390px] mx-auto',
             'bg-white',
             sticky ? 'sticky top-0 z-50' : '',
         ].join(' ')}>
@@ -51,7 +53,7 @@ export default function CategoryHeader({ category, showWriteButton = true, onBac
                         <img src={WritePost} alt="" aria-hidden="true" />
                     </button>
                 ) : (
-                    
+
                     <span className="h-10 w-10" aria-hidden="true" />
                 )}
             </div>

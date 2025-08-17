@@ -29,7 +29,7 @@ export default function PostComments() {
         },
     ];
     return (
-        <div className="w-full flex flex-col gap-4 h-[490px] p-[20px] overflow-x-scroll scroll-hidden">
+        <div className="w-full flex flex-col gap-4 h-[490px] p-[20px] overflow-y-scroll hide-scrollbar">
             {comments.map((c) => (
                 <Comment key={c.id} {...c} />
             ))}

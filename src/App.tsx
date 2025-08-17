@@ -5,6 +5,7 @@ import MainPage from "./pages/MainPage";
 import Community from "./pages/community/Community";
 import CommunityCategory from "./pages/community/CommunityCategory";
 import CommunityPost from "./pages/community/CommunityPost";
+import CommunityWrite from "./pages/community/CommunityWrite";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/board/:category" element={<CommunityCategory />} />
       <Route path="/board/:category/:postId" element={<CommunityPost />} />
+      <Route path="/board/:category/write" element={<CommunityWrite />} />
       <Route
         path="/*"
         element={
