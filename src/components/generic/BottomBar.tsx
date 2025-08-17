@@ -20,7 +20,7 @@ type BottomBarItemProps = {
 
 export default function BottomBar() {
     return (
-        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[30px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] absolute bottom-0 z-10 ">
+        <div className="flex justify-start w-full gap-[16px] pt-[12px] px-[10px] pb-[30px] shadow-[0px_3px_20px_0px_rgba(71,81,89,0.15)] absolute bottom-0 left-0 z-10 ">
             <BottomBarItem to="/" icon={HomeIcon} toggleIcon={ToggleHome} label="Home" />
             <BottomBarItem to="/road-map" icon={Roadmap} toggleIcon={ToggleRoadmap} label="path" />
             <BottomBarItem to="/community" icon={Community} toggleIcon={ToggleCommunity} label="Community" />

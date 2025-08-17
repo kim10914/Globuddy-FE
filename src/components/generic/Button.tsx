@@ -10,7 +10,6 @@ type ButtonProps = {
 export default function Button({ children, variant, ...props }: ButtonProps) {
   const variantStyle: VariantStyleMap = {
     generic: "", // 일반적인 InputField 스타일
-    modifyPage: "", // 다른 InputField가 쓰이는 00페이지
   };
   return (
     <div>
