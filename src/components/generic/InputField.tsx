@@ -7,15 +7,13 @@ type InputFieldProps = {
     variant: CommonVariant; // 스타일 타입 분기
 } & React.InputHTMLAttributes<HTMLInputElement> //  해당 타입 정의로 Input 요소들을 전부 받아줌
 
-export default function InputField({variant, ...props}: InputFieldProps) {
-    const variantStyle : VariantStyleMap = {
-        generic: '', // 일반적인 InputField 스타일
-        modifyPage: '', // 00 페이지 전용 스타일
-    }
-    return (
-        <div>
-            <input {...props} 
-            className={clsx(variantStyle[variant]??'')} />
-        </div>
-    );
+export default function InputField({ variant, ...props }: InputFieldProps) {
+  const variantStyle: VariantStyleMap = {
+    generic: "", // 일반적인 InputField 스타일
+  };
+  return (
+    <div>
+      <input {...props} className={clsx(variantStyle[variant] ?? "")} />
+    </div>
+  );
 }

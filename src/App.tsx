@@ -2,6 +2,10 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Signup from "./pages/Signup";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
+import Community from "./pages/community/Community";
+import CommunityCategory from "./pages/community/CommunityCategory";
+import CommunityPost from "./pages/community/CommunityPost";
+import CommunityWrite from "./pages/community/CommunityWrite";
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
@@ -15,7 +19,11 @@ function App() {
 
       <Route path="/" element={<MainPage />} />
       <Route path="/login" element={<Signup />} />
+      <Route path="/community" element={<Community />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
+      <Route path="/board/:category" element={<CommunityCategory />} />
+      <Route path="/board/:category/:postId" element={<CommunityPost />} />
+      <Route path="/board/:category/write" element={<CommunityWrite />} />
       <Route
         path="/*"
         element={

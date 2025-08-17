@@ -8,11 +8,15 @@ type LabelProps = {
     serveText? : string
     children?: React.ReactNode
 }
-
+/** 사용자 레이블 컴포넌트
+ * @param {React.ReactNode} children? 출력 내용
+ * @param {string} serveText? 설명 텍스트(있으면 사용)
+ * @param {CommonVariant} variant 스타일 적용 페이지
+ */
 export default function Label({ children="", variant, serveText }: LabelProps) {
     const variantStyle : VariantStyleMap = {
         generic: '', // 일반 적인 스타일
-        modifyPage: '', // 00페이지 전용 스타일
+        community: 'text-[14px] text-[#667085] font-normal', // 커뮤니티 전용 스타일
     }
     return (
         <div>
