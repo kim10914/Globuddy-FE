@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { Post } from '../../types'
 
 import Heart from '../../assets/community/좋아요.svg'
@@ -15,6 +15,7 @@ type CommunityPostCardProps = Post & {
     showMenu?: boolean; // 내 글 화면 등에서 우측 상단 메뉴 노출
     onMenuClick?: (id: Post["id"]) => void; // 메뉴 클릭 콜백(옵션)
     disableNavigation?: boolean; // 링크 이동 활성화
+    navState?: any; // 라우팅 state 전달
 };
 
 /**
@@ -23,9 +24,9 @@ type CommunityPostCardProps = Post & {
  * @param {boolean} disableNavigation 카드 링크 옵션 true = 비활성화
  * @returns {JSX.Element} 게시글 카드 UI
  */
-export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, likes, comments, showMenu = false, onMenuClick, disableNavigation = false,}: CommunityPostCardProps) => {
+export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, likes, comments, showMenu = false, onMenuClick, disableNavigation = false, navState, }: CommunityPostCardProps) => {
     const [likeState, setLikeState] = useState({ isLiked: false, count: likes }); // 좋아요 표시
-    const category = BOARD_CATEGORIES[0].label;
+    const { category } = useParams<{ category: string }>();
     const navigate = useNavigate();
 
     /** 좋아요 버튼 토글 핸들러 (아이콘 전환 + 카운트 증감) */
@@ -36,13 +37,13 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
         }));
     };
     /** 카드 클릭 핸들러 */
-    const handleClick = () => {
-        if (!disableNavigation) {
-            navigate(`/board/${category}/${id}`);
-        }
+    const handleCardClick = () => {
+        if (disableNavigation) return;
+        const slug = category ?? 'general';
+        navigate(`/board/${slug}/${id}`, { state: navState }); // state 전달
     };
     return (
-        <div onClick={handleClick}
+        <div onClick={handleCardClick}
             className="w-[350px] flex flex-col gap-[19px] p-[16px] rounded-[6px] bg-white prop-shadow z-10">
             {/* 유저 프로필 부분 */}
             <div className="flex gap-[16px] relative">

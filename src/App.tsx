@@ -9,6 +9,7 @@ import CommunityWrite from "./pages/community/CommunityWrite";
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
+import CommunityMyPost from "./pages/community/CommunityMyPost";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <Route path="/board/:category" element={<CommunityCategory />} />
       <Route path="/board/:category/:postId" element={<CommunityPost />} />
       <Route path="/board/:category/write" element={<CommunityWrite />} />
+      <Route path="/board/:category/mine" element={<CommunityMyPost />} />
       <Route
         path="/*"
         element={

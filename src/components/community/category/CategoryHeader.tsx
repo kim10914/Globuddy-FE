@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation  } from 'react-router-dom'
 import Goback from '../../../assets/generic/뒤로가기.svg'
 import WritePost from '../../../assets/community/글쓰기.svg'
 
@@ -13,14 +13,16 @@ type CategoryHeaderProps = {
 /**
  * 커뮤니티 헤더
  * @param {string} category 카테고리 
- * @param {boolean} showWriteButton 글쓰기 버튼 이용(false = 보임)
+ * @param {boolean} showWriteButton 글쓰기 버튼 이용(false = 안보임)
  * @param {boolean} sticky 상단에 고정 
  * @returns 
  */
 export default function CategoryHeader({ category, showWriteButton = true, onBack, onWrite, sticky = false, }: CategoryHeaderProps) {
     const navigate = useNavigate();
+    const location = useLocation(); 
     const { category: routeCategory } = useParams<{ category: string }>();
     const slug = routeCategory && routeCategory.length > 0 ? routeCategory : 'general';
+    const displayTitle = (location.state as any)?.headerTitle ?? category; // 카테고리 보다 경로를 우선으로 사용
     /** 뒤로가기 */
     const handleGoback = () => {
         // 외부 핸들러 우선 적용
@@ -42,11 +44,11 @@ export default function CategoryHeader({ category, showWriteButton = true, onBac
     return (
         <header className={['w-full max-w-[390px] mx-auto',
             'bg-white',
-            sticky ? 'sticky top-0 z-50' : '',
+            sticky ? 'sticky top-0' : '',
         ].join(' ')}>
             <div className='grid grid-cols-[40px_1fr_40px] items-center px-4 py-3'>
                 <button type="button" onClick={handleGoback}><img src={Goback} alt="<-" /></button>
-                <p className='justify-self-center text-[#1D2939] text-[16px] font-medium'>{category}</p>
+                <p className='justify-self-center text-[#1D2939] text-[16px] font-medium'>{displayTitle}</p>
                 {/* 글쓰기 버튼 (숨길 때도 같은 폭을 차지하여 타이틀이 중앙 유지) */}
                 {showWriteButton ? (
                     <button type="button" onClick={handleWritePost} className="h-10 w-10 p-2 flex items-center justify-center">
