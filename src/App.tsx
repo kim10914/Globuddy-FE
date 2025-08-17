@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
-import Signup from "./pages/Signup";
-import AuthCallbackPage from "./pages/AuthCallbackPage";
+import Signup from "./pages/login-page/Signup";
+import AuthCallbackPage from "./pages/login-page/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
 import Community from "./pages/community/Community";
 import CommunityCategory from "./pages/community/CommunityCategory";
@@ -9,16 +9,18 @@ import CommunityWrite from "./pages/community/CommunityWrite";
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
-
+import LoginOnboarding from "./pages/login-page/LoginOnboarding";
+import LoadingPage from "./pages/LoadingPage";
 
 function App() {
   const islogin: boolean = true;
 
   return (
     <Routes>
-
       <Route path="/" element={<MainPage />} />
+      <Route path="/loading" element={<LoadingPage />} />
       <Route path="/login" element={<Signup />} />
+      <Route path="/login/onboarding" element={<LoginOnboarding />} />
       <Route path="/community" element={<Community />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
       <Route path="/board/:category" element={<CommunityCategory />} />
