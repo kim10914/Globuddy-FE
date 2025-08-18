@@ -71,7 +71,7 @@ export async function googleAuthLoginApi(
   code: string
 ): Promise<GoogleAuthResponse> {
   const response = await apiClient.post<GoogleAuthResponse>(
-    "/api/auth/google",
+    "https://spring.jinwook.shop/api/auth/google",
     { code }
   );
   return response.data;
