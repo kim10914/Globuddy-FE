@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import type { CategoryKey } from "../../types";
 import MyPageButton from "./MyPageButton";
 import notiIcon from "../../assets/mypage/notifications.png";
 import chatIcon from "../../assets/mypage/mychatting.png";
@@ -11,9 +12,15 @@ export type SetShowLogoutModal = {
 };
 
 export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
+  const { category } = useParams<{ category: string }>();
+  const slug = (category as CategoryKey) ?? "general";
+
   const nav = useNavigate();
   function onLogoutHandler() {
     setShowLogoutModal(true);
+  }
+  const handleMyCommunity = () => {
+    nav(`/board/${slug}/mine`)
   }
   return (
     <div className="absolute bottom-0  w-full h-4/6 flex flex-col  bg-white rounded-t-xl p-5">
@@ -28,7 +35,7 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
           }}
         />
         <MyPageButton title="My Chatting" iconSrc={chatIcon} />
-        <MyPageButton title="My Community" iconSrc={commuIcon} />
+        <MyPageButton title="My Community" iconSrc={commuIcon} onClick={handleMyCommunity} />
         <MyPageButton
           title="Setting"
           onClick={() => {

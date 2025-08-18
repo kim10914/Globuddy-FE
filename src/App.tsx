@@ -11,6 +11,9 @@ import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
 import LoginOnboarding from "./pages/login-page/LoginOnboarding";
 import LoadingPage from "./pages/LoadingPage";
+import CommunityMyPost from "./pages/community/CommunityMyPost";
+import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
+import VisaSearch from "./pages/roadmap/VisaSearch";
 
 function App() {
   const islogin: boolean = true;
@@ -27,6 +30,9 @@ function App() {
       <Route path="/board/:category" element={<CommunityCategory />} />
       <Route path="/board/:category/:postId" element={<CommunityPost />} />
       <Route path="/board/:category/write" element={<CommunityWrite />} />
+      <Route path="/board/:category/mine" element={<CommunityMyPost />} />
+      <Route path="/road-map" element={<RoadmapFlights />} />
+      <Route path="/visa/:country" element={<VisaSearch />} />
       <Route
         path="/*"
         element={
