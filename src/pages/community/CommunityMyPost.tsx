@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import CategoryHeader from "../../components/community/category/CategoryHeader";
 import PostsList from "../../components/community/PostsList";
-import { CategoryInfo, type CategoryKey, type Post } from "../../types";
+import { type CategoryKey, type Post } from "../../types";
 import { DUMMY_POSTS } from "../../components/community/data";
 
 export default function CommunityMyPost() {
@@ -11,8 +11,6 @@ export default function CommunityMyPost() {
 
     // category가 CategoryKey인지 체크
     const categoryKey = category as CategoryKey | undefined;
-    const categoryData = categoryKey && CategoryInfo[categoryKey];
-    const title = categoryData ? categoryData.name : "게시판";
 
     /** 내가 쓴 글만 필터링 -> 추후 API 연동으로 변경될 수 있음 */
     const myPosts: Post[] = useMemo(() => {

@@ -6,7 +6,6 @@ import Heart from '../../assets/community/좋아요.svg'
 import ClickHeart from '../../assets/community/클릭좋아요.svg'
 import Message from '../../assets/community/메시지.svg'
 import CardOption from '../../assets/community/옵션.svg'
-import { BOARD_CATEGORIES } from './data'
 /**
  * 게시글 카드에서 사용하는 프로퍼티
  * - Post의 필드에 화면 옵션을 추가
