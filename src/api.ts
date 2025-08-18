@@ -203,3 +203,23 @@ export async function getRoadmapByIdApi(
 
   return normalized;
 }
+
+export interface UserProfileResponse {
+  id: number;
+  email: string;
+  nickname: string;
+  avatarUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 유저 프로필 조회 API
+ * - 서버에서 JWT 기반으로 현재 로그인한 사용자의 프로필을 반환
+ */
+export async function getUserProfileApi(): Promise<UserProfileResponse> {
+  const res = await retryRequest(() =>
+    apiClient.get<UserProfileResponse>("/member/profile")
+  );
+  return res.data;
+}

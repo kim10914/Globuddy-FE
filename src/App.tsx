@@ -17,7 +17,10 @@ import VisaSearch from "./pages/roadmap/VisaSearch";
 import VisaInfo from "./pages/roadmap/VisaInfo";
 
 function App() {
-  const islogin: boolean = true;
+  function isLoggedIn() {
+    const token = localStorage.getItem("accessToken");
+    return !!token; // 있으면 true !!token
+  }
 
   return (
     <Routes>
@@ -38,7 +41,7 @@ function App() {
       <Route
         path="/*"
         element={
-          islogin ? ( //로그인 상태시 접근 가능 페이지들 입니다
+          isLoggedIn() ? ( //로그인 상태시 접근 가능 페이지들 입니다
             <Routes>
               <Route path="/profile" element={<ProfilePage />}></Route>
               <Route path="/profile/setting" element={<SettingPage />}></Route>
