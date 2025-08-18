@@ -65,7 +65,7 @@ export const CategoryInfo: Record<CategoryKey, CategoryData> = {
     },
 } as const;
 
-/**내 글 조회 응답 */
+/** 내 글 조회 인터페이스 */
 export interface MinePostItem {
     id: number;
     title: string;
@@ -93,4 +93,37 @@ export interface PageMeta {
 export interface MinePostsResponse {
     items: MinePostItem[];
     page: PageMeta;
+}
+// PATCH /roadmap/visas 요청 바디 타입
+export interface PatchRoadmapVisaRequest {
+    country: string; // 예: "US"
+}
+
+// PATCH /roadmap/visas 응답 타입
+export interface PatchRoadmapVisaResponse {
+    id: number;
+    title: string | null;
+    content: string;
+    categoryId: number;
+    categoryName: string;
+    country: string;
+    userId: number;
+    name: string;
+    hashtag: string | null;
+    createdAt: string; // ISO-8601
+    updatedAt: string; // ISO-8601
+    replyCount: number;
+    likeCount: number;
+}
+/** 유저 비자 선택 및 로드맵 조회 */
+export interface RoadmapSection2Item {
+    subtitle: string;
+    content: string[];
+}
+export interface PatchRoadmapByIdResponse {
+    visaId: number;
+    description: string;
+    section1: string[];
+    section2: RoadmapSection2Item[];
+    section3: string[];
 }

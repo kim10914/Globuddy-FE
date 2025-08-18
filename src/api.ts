@@ -1,15 +1,13 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
-import type { MinePostsResponse } from "./types";
+import type { MinePostsResponse, PatchRoadmapVisaRequest, PatchRoadmapVisaResponse, PatchRoadmapByIdResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
 
-
-// 액세스 토큰 키 - 프로젝트 규칙 반영('accessToken')
+// 액세스 토큰 키
 const ACCESS_TOKEN_KEY = "accessToken";
-
 /** 공통: 로컬 스토리지에서 토큰 조회 */
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_TOKEN_KEY) ?? null;
@@ -129,5 +127,44 @@ export async function fetchMyPostsApi(params?: {
       params: { page, size, sort: sortParam },
     })
   );
+  return res.data;
+}
+
+/** 비자 수정 PATCH */
+export async function patchRoadmapVisaApi(
+  payload: PatchRoadmapVisaRequest,
+  options?: { signal?: AbortSignal }
+): Promise<PatchRoadmapVisaResponse> {
+  const token = getAccessToken();
+  if (!token) {
+    throw new Error("인증 토큰이 없습니다. 로그인 후 다시 시도하세요.");
+  }
+  const res = await retryRequest(() =>
+    apiClient.patch<PatchRoadmapVisaResponse>(
+      "/roadmap/visas", // baseURL + path
+      payload, // { country: "US" }
+      { signal: options?.signal } // 취소/타임아웃 제어 선택사항
+    )
+  );
+  return res.data;
+}
+/** 비자 로드맵 선택/설정(PATCH /roadmap/{visaId}) */
+export async function patchRoadmapByIdApi(
+  visaId: number | string, // path parameter
+  options?: { signal?: AbortSignal } // 요청 취소/타임아웃 제어 (선택)
+): Promise<PatchRoadmapByIdResponse> { // 응답 타입
+  // request header에 토큰 필수 -> 인터셉터가 넣지만 사전 검증
+  const token = getAccessToken();
+  if (!token) {
+    throw new Error("인증 토큰이 없습니다. 로그인 후 다시 시도하세요.");
+  }
+  const res = await retryRequest(() =>
+    apiClient.patch<PatchRoadmapByIdResponse>(
+      `/roadmap/${visaId}`,
+      null,
+      { signal: options?.signal }
+    )
+  );
+
   return res.data;
 }
