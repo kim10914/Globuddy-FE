@@ -56,7 +56,10 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
                     <button
                         type="button"
                         className="absolute right-0 top-0 px-2 py-1"
-                        onClick={() => onMenuClick?.(id)} // 변경: 실제 id 전달
+                        onClick={(e) => {
+                            e.stopPropagation(); //부모 onClick(네비게이션) 차단
+                            onMenuClick?.(id); // 아이디 전달
+                        }}
                     >
                         <img src={CardOption} alt="options" />
                     </button>

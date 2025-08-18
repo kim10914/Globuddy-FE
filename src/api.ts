@@ -1,10 +1,18 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
+
+
+// 액세스 토큰 키 - 프로젝트 규칙 반영('accessToken')
+const ACCESS_TOKEN_KEY = "accessToken";
+
+/** 공통: 로컬 스토리지에서 토큰 조회 */
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY) ?? null;
+}
 
 /** 구글 로그인 인터페이스 */
 interface GoogleAuthResponse {
@@ -55,6 +63,18 @@ export const retryRequest = async <T>(
     throw error;
   }
 };
+/** 요청 인터셉터 - 매 요청마다 Authorization 자동 첨부 */
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = getAccessToken();
+  if (token) {
+    // headers가 AxiosHeaders 객체일 수 있으므로 안전하게 set
+    if (config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers["X-AUTH-TOKEN"] = token;
+    }
+  }
+  return config;
+});
 
 /**유저 아이디 가져오는 함수- 저장된 유저 ID가 없을 경우 null 반환
  * @returns {string | null} 유저 ID 또는 null
@@ -76,11 +96,19 @@ export async function googleAuthLoginApi(
   );
   return response.data;
 }
-// 구글 로그인 fetch(구)
-// export async function googleAuthLoginApi(code: string): Promise<Response> {
-//   return fetch("/api/auth/google", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ code }),
-//   });
-// }
+
+/** 게시글 삭제 */
+export async function deletePostApi(postId: number | string): Promise<void> { // [추가]
+  const path = `/posts/delete/${postId}`;
+  await retryRequest(async () => {
+    const res = await apiClient.delete(path);
+    // 반환값 없음, 204가 정상
+    if (res.status !== 204) {
+      // 서버가 body 없이 다른 코드로 응답할 수도 있으므로 메시지 보강
+      const err = new Error(`Delete failed (status: ${res.status})`);
+      // Axios 에러로 던져서 상위에서 통일 처리
+      throw err;
+    }
+    return;
+  });
+}
