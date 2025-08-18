@@ -1,6 +1,6 @@
 //구글 로그인 후 콜백 페이지 입니다
 import { useEffect } from "react";
-import { googleAuthLoginApi } from "../../api";
+import { kakaoAuthLoginApi } from "../../api";
 import { useNavigate } from "react-router-dom";
 
 export default function AuthCallbackPageKaKao() {
@@ -15,10 +15,11 @@ export default function AuthCallbackPageKaKao() {
         navigate("/login");
         return;
       }
-      const response = await googleAuthLoginApi(code);
-      if (response.success) {
+      const response = await kakaoAuthLoginApi(code);
+      if (response.success && response.token) {
         // 로그인 성공 처리
-        navigate("/");
+        localStorage.setItem("accessToken", response.token);
+        navigate("/login/onboarding");
       } else {
         // 로그인 실패 처리
         navigate("/login");

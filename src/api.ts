@@ -96,7 +96,21 @@ export async function googleAuthLoginApi(
   code: string
 ): Promise<GoogleAuthResponse> {
   const response = await apiClient.post<GoogleAuthResponse>(
-    "https://spring.jinwook.shop/KaKao/doLogin",
+    "https://spring.jinwook.shop/google/doLogin",
+    { code }
+  );
+  return response.data;
+}
+
+/** 카카오 로그인 API 호출 - 인증 후 받은 코드를 백엔드로 전송
+ * @param {string} code 카카오 로그인 후 받은 허가 코드
+ * @returns {Promise<GoogleAuthResponse>} 백엔드에서 반환된 응답 데이터
+ */
+export async function kakaoAuthLoginApi(
+  code: string
+): Promise<GoogleAuthResponse> {
+  const response = await apiClient.post<GoogleAuthResponse>(
+    "https://spring.jinwook.shop/kakao/doLogin",
     { code }
   );
   return response.data;

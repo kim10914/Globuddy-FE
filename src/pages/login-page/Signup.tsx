@@ -2,8 +2,10 @@
 
 import { onGoogleLoginClick } from "../../utils/google-login/googleAuthUtil";
 import googleIcon from "../../assets/login-page/구글아이콘.svg";
+import kakaoIcon from "../../assets/login-page/카카오 로그인 버튼.svg";
 import pathportIcom from "../../assets/generic/패스포트아이콘.svg";
 import Pathport from "../../assets/login-page/Pathport.svg";
+import { onKaKaoLoginClick } from "../../utils/kakao-login/kakaoAuthUtil";
 
 export default function Signup() {
   return (
@@ -31,6 +33,13 @@ export default function Signup() {
             >
               <img src={googleIcon} className="px-2" />
               <h1>Sign in with Google</h1>
+            </button>
+            <button
+              onClick={() => {
+                onKaKaoLoginClick();
+              }}
+            >
+              <img src={kakaoIcon} className="px-2" />
             </button>
           </div>
         </div>
