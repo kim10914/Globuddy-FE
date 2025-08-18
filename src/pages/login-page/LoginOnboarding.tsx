@@ -80,7 +80,7 @@ export default function LoginOnboarding() {
                 pickedLocation ? "text-gray-900" : "text-[#98A2B3]"
               }`}
             >
-              {pickedLocation ?? "Where to?"}
+              {pickedLocation ?? "Where do you want to go?"}
             </span>
           </button>
           <section className="bg-[#F9FAFB] rounded-[6px] py-[10px] px-[16px]">
