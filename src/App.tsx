@@ -23,6 +23,7 @@ function App() {
       <Route path="/login/onboarding" element={<LoginOnboarding />} />
       <Route path="/community" element={<Community />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
+      <Route path="/oauth/kakao/redirect" element={<AuthCallbackPage />} />
       <Route path="/board/:category" element={<CommunityCategory />} />
       <Route path="/board/:category/:postId" element={<CommunityPost />} />
       <Route path="/board/:category/write" element={<CommunityWrite />} />
