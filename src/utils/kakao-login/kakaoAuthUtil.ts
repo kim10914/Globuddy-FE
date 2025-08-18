@@ -1,5 +1,5 @@
 function getKakaoAuthURL(clientId: string, redirectUri: string) {
-  const base = "https://accounts.kakao.com/o/oauth2/v2/auth";
+  const base = "https://kauth.kakao.com/oauth/authorize";
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
@@ -14,5 +14,5 @@ export function onKaKaoLoginClick() {
   const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 
   const authUrl = getKakaoAuthURL(KAKAO_REST_API_KEY, KAKAO_REDIRECT_URI);
-  window.location.href = authUrl; // 구글 로그인 화면으로 이동
+  window.location.href = authUrl; // 카카오 로그인 화면으로 이동
 }
