@@ -1,10 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 export type SetShowLogoutModal = {
   setShowLogoutModal: (show: boolean) => void;
 };
 
 export default function Logout({ setShowLogoutModal }: SetShowLogoutModal) {
+  const nav = useNavigate();
   function onCancelHandler() {
     setShowLogoutModal(false);
+  }
+  function onLogoutHandler() {
+    setShowLogoutModal(false);
+    localStorage.removeItem("accessToken");
+    nav("/login");
   }
 
   return (
@@ -18,7 +26,10 @@ export default function Logout({ setShowLogoutModal }: SetShowLogoutModal) {
       >
         Cancel
       </button>
-      <button className="w-11/12  mx-4 p-3 bg-white text-[#0085FF] border-1 rounded-lg border-[#0085FF]">
+      <button
+        onClick={onLogoutHandler}
+        className="w-11/12  mx-4 p-3 bg-white text-[#0085FF] border-1 rounded-lg border-[#0085FF]"
+      >
         Logout
       </button>
     </div>
