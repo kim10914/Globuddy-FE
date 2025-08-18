@@ -1,11 +1,24 @@
 import { useParams } from "react-router-dom";
-import { useMemo, useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import CategoryHeader from "../../components/community/category/CategoryHeader";
 import PostsList from "../../components/community/PostsList";
-import { type CategoryKey, type Post } from "../../types";
-import { DUMMY_POSTS } from "../../components/community/data";
+import { type CategoryKey, type Post, type MinePostItem } from "../../types";
+// import { DUMMY_POSTS } from "../../components/community/data"; // 더미
 import DeleteCard from "../../components/community/MyPost/DeleteCard";
-
+import { fetchMyPostsApi } from "../../api";
+// 서버 응답 -> UI Post 타입 변환기
+function adaptMineItemToPost(item: MinePostItem): Post {
+    return {
+        id: item.id,
+        // 서버에서 아바타를 주지 않으면 플레이스홀더 사용(필요 시 교체)
+        avatar: "/assets/community/avatar-default.png",
+        nickname: item.name ?? "익명",
+        createdAt: item.createdAt,
+        content: item.content,
+        likes: item.likeCount ?? 0,
+        comments: item.replyCount ?? 0,
+    };
+}
 /**
  * 내가 쓴 글 목록 페이지
  *
@@ -20,13 +33,33 @@ export default function CommunityMyPost() {
     const [deleteOpen, setDeleteOpen] = useState(false); // 오픈?
     const [targetId, setTargetId] = useState<Post["id"] | null>(null); //  대상 게시불 아이디
 
-    /** 내가 쓴 글만 필터링 -> 추후 API 연동으로 변경될 수 있음 */
-    const myPosts: Post[] = useMemo(() => {
-        if (!categoryKey) return [];
-        return DUMMY_POSTS
-            .filter(p => p.category === categoryKey && p.nickname === myNickname)
-            .map(({ category: _c, ...rest }) => rest);
-    }, [categoryKey, myNickname]);
+    const [myPosts, setMyPosts] = useState<Post[]>([]);       // 서버 데이터 보관
+    const [loading, setLoading] = useState(false);            // 로딩 상태
+    const [errorMsg, setErrorMsg] = useState<string | null>(null); // 에러 메시지
+
+    //목록 로드 함수
+    const loadMyPosts = useCallback(async () => {
+        setLoading(true);
+        setErrorMsg(null);
+        try {
+            const res = await fetchMyPostsApi({
+                page: 0,
+                size: 100,
+                sort: "createdAt",
+                order: "desc",
+            });
+            let list = res.items.map(adaptMineItemToPost);
+            setMyPosts(list);
+        } catch (e) {
+            setErrorMsg("내 글 목록을 불러오지 못했습니다."); // 에러
+        } finally {
+            setLoading(false);
+        }
+    }, [categoryKey]); // 카테고리 탭 전환 시 재조회가 필요하면 포함
+
+    useEffect(() => {
+        loadMyPosts(); // 최초/파라미터 변경 시 가져오기
+    }, [loadMyPosts]);
 
     /** 내 글 카드 메뉴의 버튼 핸들러 */
     const handleMenuAction = useCallback((action: { type: "delete" | "edit"; id: Post["id"] }) => {
@@ -35,23 +68,24 @@ export default function CommunityMyPost() {
             setDeleteOpen(true);
         }
     }, []);
-    /** [추가] 삭제 성공 후 후처리: 낙관적 갱신/리패치 */
+    // 삭제 성공 시 서버 최신 목록 재조회
     const handleDeleted = useCallback(() => {
-        // TODO: 실제 API를 써서 목록을 refetch 하거나,
-        // 상태 관리 툴(query, zustand 등)로 리스트에서 targetId를 제거
-        // 예시)
-        // queryClient.invalidateQueries(['posts', categoryKey, myNickname])
         setTargetId(null);
-    }, []);
-
+        setDeleteOpen(false);
+        loadMyPosts(); //삭제 반영된 목록 재조회
+    }, [loadMyPosts]);
+    // 로딩/에러 상태 UI는 기존 emptyState를 활용하거나 상단에서 처리
+    const emptyNode = (
+        <p className="text-[#98A2B3] text-sm">
+            {loading ? "불러오는 중..." : errorMsg ?? "작성한 게시글이 없습니다."}
+        </p>
+    );
     return (
         <div>
             <CategoryHeader category="내가 쓴 글" sticky showWriteButton={false} />
             <div className="flex flex-col h-[calc(100vh-60px)] items-center overflow-y-auto hide-scrollbar pt-[12px] ">
                 <PostsList posts={myPosts} limit={100} variant="mine" onMenuAction={handleMenuAction}
-                    emptyState={
-                        <p className="text-[#98A2B3] text-sm">작성한 게시글이 없습니다.</p>
-                    }
+                    emptyState={emptyNode}
                 />
                 {/* 삭제 모달 주입 */}
                 <DeleteCard

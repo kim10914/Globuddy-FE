@@ -63,4 +63,34 @@ export const CategoryInfo: Record<CategoryKey, CategoryData> = {
         description: "궁금한 건 모든지 얘기해보세요",
         tag: "#무물보 #오늘의TMI",
     },
-} as const; 
+} as const;
+
+/**내 글 조회 응답 */
+export interface MinePostItem {
+    id: number;
+    title: string;
+    content: string;
+    categoryId: number;
+    categoryName: string;
+    country: string;
+    userId: number;
+    name: string;            // 익명/실명 관계없이 사용자명 반환
+    hashtag?: string | null;
+    createdAt: string;
+    updatedAt?: string | null;
+    replyCount: number;      // 댓글 수
+    likeCount: number;       // 좋아요 수
+}
+
+export interface PageMeta {
+    number: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+
+export interface MinePostsResponse {
+    items: MinePostItem[];
+    page: PageMeta;
+}

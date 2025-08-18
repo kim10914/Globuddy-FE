@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
+import type { MinePostItem, PageMeta, MinePostsResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
@@ -111,4 +112,22 @@ export async function deletePostApi(postId: number | string): Promise<void> { //
     }
     return;
   });
+}
+/** 내 글 목록 조회 */
+export async function fetchMyPostsApi(params?: {
+  page?: number;
+  size?: number;
+  sort?: string;
+  order?: "asc" | "desc";
+}): Promise<MinePostsResponse> {
+  const { page = 0, size = 100, sort = "createdAt", order = "desc" } = params ?? {};
+  const sortParam = `${sort},${order}`;
+
+  // 재시도 래퍼 사용
+  const res = await retryRequest(() =>
+    apiClient.get<MinePostsResponse>("/posts/all/mine", {
+      params: { page, size, sort: sortParam },
+    })
+  );
+  return res.data;
 }
