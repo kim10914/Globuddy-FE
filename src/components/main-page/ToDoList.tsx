@@ -107,11 +107,14 @@ export const ToDoList = () => {
     )
 }
 
-/** 
+/**
  * 단일 아이템
+ * @param {string} checkbox? 채크박스
+ * @param {string} checkedImg? 채크된 박스
+ * @param {string} NullToDo? 아무것도 없는 이미지
  * @param {string} ToDo? ToDo 리스트 내용
  * @param {boolean} defaultChecked? 기본 채크 상태
- * @param {void} onToggle 채크 시 백엔드에 patch하는 함수 
+ * @param {void} onToggle 채크 시 백엔드에 patch하는 함수
  */
 export const ToDoListItems = ({ ToDo, checked, defaultChecked = false, onToggle }: ToDoListItemsProps) => {
     const [innerChecked, setInnerChecked] = useState(defaultChecked)
@@ -148,5 +151,4 @@ export const ToDoListItems = ({ ToDo, checked, defaultChecked = false, onToggle 
     )
 }
 
-
-export default ToDoList
+export default ToDoList;

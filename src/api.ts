@@ -4,7 +4,8 @@ import type {
   PostDetail, PageableQuery, PostsListResponse, PageMeta, UpdateChecklistResponse, CountryImageResponse, ChecklistResponse
 } from "./types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
@@ -103,14 +104,29 @@ export async function googleAuthLoginApi(
   code: string
 ): Promise<GoogleAuthResponse> {
   const response = await apiClient.post<GoogleAuthResponse>(
-    "/api/auth/google",
+    "https://spring.jinwook.shop/google/doLogin",
+    { code }
+  );
+  return response.data;
+}
+
+/** 카카오 로그인 API 호출 - 인증 후 받은 코드를 백엔드로 전송
+ * @param {string} code 카카오 로그인 후 받은 허가 코드
+ * @returns {Promise<GoogleAuthResponse>} 백엔드에서 반환된 응답 데이터
+ */
+export async function kakaoAuthLoginApi(
+  code: string
+): Promise<GoogleAuthResponse> {
+  const response = await apiClient.post<GoogleAuthResponse>(
+    "https://spring.jinwook.shop/kakao/doLogin",
     { code }
   );
   return response.data;
 }
 
 /** 게시글 삭제 */
-export async function deletePostApi(postId: number | string): Promise<void> { // [추가]
+export async function deletePostApi(postId: number | string): Promise<void> {
+  // [추가]
   const path = `/posts/delete/${postId}`;
   await retryRequest(async () => {
     const res = await apiClient.delete(path);
@@ -149,7 +165,12 @@ export async function fetchMyPostsApi(params?: {
   sort?: string;
   order?: "asc" | "desc";
 }): Promise<MinePostsResponse> {
-  const { page = 0, size = 100, sort = "createdAt", order = "desc" } = params ?? {};
+  const {
+    page = 0,
+    size = 100,
+    sort = "createdAt",
+    order = "desc",
+  } = params ?? {};
   const sortParam = `${sort},${order}`;
 
   // 재시도 래퍼 사용
@@ -314,10 +335,12 @@ export async function getRoadmapByIdApi(
     description: raw.description ?? "",
     section1: Array.isArray(raw.section1) ? raw.section1 : [],
     section2: Array.isArray(raw.section2)
-      ? raw.section2.map((it: any): RoadmapSection2Item => ({
-        subtitle: it?.subtitle ?? "",
-        content: Array.isArray(it?.content) ? it.content : [],
-      }))
+      ? raw.section2.map(
+        (it: any): RoadmapSection2Item => ({
+          subtitle: it?.subtitle ?? "",
+          content: Array.isArray(it?.content) ? it.content : [],
+        })
+      )
       : [],
     section3: Array.isArray(raw.section3) ? raw.section3 : [],
   };
