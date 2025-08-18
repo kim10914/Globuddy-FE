@@ -1,5 +1,8 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
-import type { MinePostsResponse, PatchRoadmapVisaRequest, PatchRoadmapVisaResponse, PatchRoadmapByIdResponse, RoadmapSection2Item } from "./types";
+import type {
+  MinePostsResponse, PatchRoadmapVisaRequest, PatchRoadmapVisaResponse, PatchRoadmapByIdResponse, RoadmapSection2Item, CreatePostRequest,
+  PostDetail, PageableQuery, PostsListResponse, PageMeta, UpdateChecklistResponse, CountryImageResponse, ChecklistResponse
+} from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
@@ -111,6 +114,24 @@ export async function deletePostApi(postId: number | string): Promise<void> { //
     return;
   });
 }
+/** 게시글 응답 표준화 유틸 */
+function normalizePost(raw: any): PostDetail {
+  return {
+    id: Number(raw?.id ?? 0),
+    title: raw?.title ?? null,
+    content: raw?.content ?? "",
+    categoryId: Number(raw?.categoryId ?? 0),
+    categoryName: raw?.categoryName ?? null,
+    country: raw?.country ?? "",
+    userId: Number(raw?.userId ?? 0),
+    name: raw?.name ?? null,
+    hashtag: raw?.hashtag ?? null,
+    createdAt: raw?.createdAt ?? "",
+    updatedAt: raw?.updatedAt ?? "",
+    replyCount: Number(raw?.replyCount ?? 0),
+    likeCount: Number(raw?.likeCount ?? 0),
+  };
+}
 /** 내 글 목록 조회 */
 export async function fetchMyPostsApi(params?: {
   page?: number;
@@ -129,7 +150,126 @@ export async function fetchMyPostsApi(params?: {
   );
   return res.data;
 }
+// 새 게시글 작성: POST /posts/new
+export async function createPostApi(
+  body: CreatePostRequest,
+  options?: { signal?: AbortSignal }
+): Promise<PostDetail> {
+  // 필수값 간단 가드 (재사용 가능)
+  if (!body?.content || typeof body.categoryId !== "number" || !body.country) {
+    throw new Error("content, categoryId, country는 필수입니다.");
+  }
 
+  const res = await retryRequest(() =>
+    apiClient.post("/posts/new", body, { signal: options?.signal })
+  );
+
+  // 스웨거는 200 OK를 예시로 제시
+  if (res.status !== 200 && res.status !== 201) {
+    throw new Error(`Create failed (status: ${res.status})`);
+  }
+
+  return normalizePost(res.data);
+}
+//  /posts/all : 전체 게시글 조회(검색/정렬용)
+export async function fetchAllPostsApi(
+  pageable?: PageableQuery,
+  options?: { signal?: AbortSignal }
+): Promise<PostsListResponse> {
+  // 기본값 세팅
+  const {
+    page = 0,
+    size = 20,
+    sort = ["createdAt,desc"],
+  } = pageable ?? {};
+
+  // 스웨거가 "pageable" 객체로 받으므로, 쿼리 키를 맞춰 전송
+  const params = {
+    pageable: {
+      page,
+      size,
+      sort,
+    },
+  };
+
+  const res = await retryRequest(() =>
+    apiClient.get("/posts/all", { params, signal: options?.signal })
+  );
+
+  if (res.status !== 200) {
+    throw new Error(`Fetch all posts failed (status: ${res.status})`);
+  }
+
+  const raw = res.data ?? {};
+  const items: PostDetail[] = Array.isArray(raw.items)
+    ? raw.items.map((it: any) => normalizePost(it))
+    : [];
+
+  const pageMeta: PageMeta = {
+    number: Number(raw.page?.number ?? page),
+    size: Number(raw.page?.size ?? size),
+    totalElements: Number(raw.page?.totalElements ?? 0),
+    totalPages: Number(raw.page?.totalPages ?? 0),
+    hasNext: Boolean(raw.page?.hasNext ?? false),
+  };
+
+  return { items, page: pageMeta };
+}
+/** 
+ * [추가] 카테고리별 전체 게시글 조회
+ * GET /posts/all/{categoryId}
+ * 쿼리: pageable.page, pageable.size, pageable.sort[]
+ */
+export async function fetchPostsByCategoryApi(
+  categoryId: number | string,
+  pageable?: PageableQuery,
+  options?: { signal?: AbortSignal }
+): Promise<PostsListResponse> {
+  if (categoryId === undefined || categoryId === null || categoryId === "") {
+    throw new Error("categoryId는 필수입니다.");
+  }
+
+  // 기본값 (재사용성 위해 PageableQuery 타입 사용)
+  const {
+    page = 0,
+    size = 20,
+    sort = ["createdAt,desc"],
+  } = pageable ?? {};
+
+  // Spring(스웨거)의 'pageable' 객체를 안전하게 매핑: pageable.page / pageable.size / pageable.sort
+  const params: Record<string, any> = {
+    "pageable.page": page,
+    "pageable.size": size,
+  };
+  // sort는 여러 개 허용 → 같은 키로 반복 전송
+  params["pageable.sort"] = sort;
+
+  const res = await retryRequest(() =>
+    apiClient.get(`/posts/all/${categoryId}`, {
+      params,
+      signal: options?.signal,
+    })
+  );
+
+  if (res.status !== 200) {
+    throw new Error(`Fetch posts by category failed (status: ${res.status})`);
+  }
+
+  const raw = res.data ?? {};
+  const items: PostDetail[] = Array.isArray(raw.items)
+    ? raw.items.map((it: any) => normalizePost(it))
+    : [];
+
+  const pageMeta: PageMeta = {
+    number: Number(raw.page?.number ?? page),
+    size: Number(raw.page?.size ?? size),
+    totalElements: Number(raw.page?.totalElements ?? 0),
+    totalPages: Number(raw.page?.totalPages ?? 0),
+    hasNext: Boolean(raw.page?.hasNext ?? false),
+  };
+
+  return { items, page: pageMeta };
+}
 /** 비자 수정 PATCH */
 export async function patchRoadmapVisaApi(
   payload: PatchRoadmapVisaRequest,
@@ -173,4 +313,53 @@ export async function getRoadmapByIdApi(
   };
 
   return normalized;
+}
+/**
+ * [추가] 체크리스트 항목 체크/해제 업데이트
+ * POST /main/{id}/check
+ */
+export async function updateChecklistApi(
+  id: number | string,
+  options?: { signal?: AbortSignal }
+): Promise<UpdateChecklistResponse> {
+  if (!id && id !== 0) {
+    throw new Error("id는 필수입니다.");
+  }
+  const res = await retryRequest(() =>
+    apiClient.post(`/main/${id}/check`, null, { signal: options?.signal })
+  );
+  if (res.status !== 200) {
+    throw new Error(`Checklist update failed (status: ${res.status})`);
+  }
+  return res.data as UpdateChecklistResponse;
+}
+/**
+ * [추가] 국가 사진 조회
+ * GET /main/image
+ */
+export async function fetchCountryImageApi(
+  options?: { signal?: AbortSignal }
+): Promise<CountryImageResponse> {
+  const res = await retryRequest(() =>
+    apiClient.get("/main/image", { signal: options?.signal })
+  );
+  if (res.status !== 200) {
+    throw new Error(`Fetch country image failed (status: ${res.status})`);
+  }
+  return res.data as CountryImageResponse;
+}
+/**
+ * [추가] 체크리스트 전체 조회
+ * GET /main/checklist
+ */
+export async function fetchChecklistApi(
+  options?: { signal?: AbortSignal }
+): Promise<ChecklistResponse> {
+  const res = await retryRequest(() =>
+    apiClient.get("/main/checklist", { signal: options?.signal })
+  );
+  if (res.status !== 200) {
+    throw new Error(`Fetch checklist failed (status: ${res.status})`);
+  }
+  return res.data as ChecklistResponse;
 }
