@@ -1,23 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 @import "tailwindcss";
 
 /* 폰트 설정 */
 body {
-    font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 /* 기본 뷰포트 */
 .app-viewport {
-    @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
+  @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
 }
 
 /* 스크롤 바 숨기기 */
 .hide-scrollbar {
-  -ms-overflow-style: none;    /* IE/Edge */
-  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
 }
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;               /* Chrome/Safari */
+  display: none; /* Chrome/Safari */
 }
 /* 그림자 */
 @layer utilities {
@@ -27,5 +27,19 @@ body {
 }
 /* 흰색 그라데이션 */
 .roadmapGradient {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 58.34%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    #ffffff 58.34%
+  );
+}
+
+/* 스크롤 바 숨기기 */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  @apply w-[390px] min-h-[844px] mx-auto overflow-auto relative;
 }

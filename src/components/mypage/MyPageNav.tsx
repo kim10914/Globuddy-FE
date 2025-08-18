@@ -20,8 +20,8 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
     setShowLogoutModal(true);
   }
   const handleMyCommunity = () => {
-    nav(`/board/${slug}/mine`)
-  }
+    nav(`/board/${slug}/mine`);
+  };
   return (
     <div className="absolute bottom-0  w-full h-4/6 flex flex-col  bg-white rounded-t-xl p-5">
       <div className="space-y-4 flex flex-col ">
@@ -35,7 +35,11 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
           }}
         />
         <MyPageButton title="My Chatting" iconSrc={chatIcon} />
-        <MyPageButton title="My Community" iconSrc={commuIcon} onClick={handleMyCommunity} />
+        <MyPageButton
+          title="My Community"
+          iconSrc={commuIcon}
+          onClick={handleMyCommunity}
+        />
         <MyPageButton
           title="Setting"
           onClick={() => {
