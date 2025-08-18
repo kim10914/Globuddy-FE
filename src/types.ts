@@ -81,7 +81,7 @@ export interface MinePostItem {
     replyCount: number;      // 댓글 수
     likeCount: number;       // 좋아요 수
 }
-
+/** 페이지 인터페이스 */
 export interface PageMeta {
     number: number;
     size: number;
@@ -89,7 +89,7 @@ export interface PageMeta {
     totalPages: number;
     hasNext: boolean;
 }
-
+/** 내글 조회하기  */
 export interface MinePostsResponse {
     items: MinePostItem[];
     page: PageMeta;
