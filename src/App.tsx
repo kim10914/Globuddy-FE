@@ -18,8 +18,8 @@ import VisaInfo from "./pages/roadmap/VisaInfo";
 
 function App() {
   function isLoggedIn() {
-    const token = localStorage.getItem("token");
-    return !token; // 있으면 true !!token
+    const token = localStorage.getItem("accessToken");
+    return !!token; // 있으면 true !!token
   }
 
   return (
