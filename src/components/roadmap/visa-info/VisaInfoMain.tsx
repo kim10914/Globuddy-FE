@@ -3,11 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import { getRoadmapByIdApi } from "../../../api";
 import type { PatchRoadmapByIdResponse } from "../../../types";
 import NonCheck from '../../../assets/generic/선택.svg'
-import { dummyRoadmapESTA } from "../data";
 import GoHomeModal from "./GoHomeModal";
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_ROADMAP === "true";
-/** 임시 코드 */
+/** 서버가 visaId 직접 제공하지 않으면 사용 */
 const VISA_ID_MAP: Record<string, Record<string, number>> = {
     usa: { "ESTA": 101, "F-1": 102, "J-1": 103, "H-1B": 104 },
     chn: { "L": 201, "Z": 202, "X": 203 },
@@ -68,50 +66,34 @@ export default function VisaInfoMain() {
         const load = async () => {
             setLoading(true);
 
-            // [ADD] 필수 query가 비어있어도 더미로 표시
+            // [수정] 필수 파라미터/매핑 누락이면 에러 표시
             if (!country || !visaCode) {
-                console.debug("[VisaInfoMain] missing query -> using dummy");
                 if (alive) {
-                    setData(dummyRoadmapESTA);
-                    setErr(null);
+                    setErr("country 또는 visa 파라미터가 없습니다.");
+                    setData(null);
                     setLoading(false);
                 }
                 return;
             }
-
-            // [ADD] 모킹 모드면 즉시 더미
-            if (USE_MOCK) {
-                console.debug("[VisaInfoMain] USE_MOCK=true -> using dummy");
-                if (alive) {
-                    setData(dummyRoadmapESTA);
-                    setErr(null);
-                    setLoading(false);
-                }
-                return;
-            }
-
-            // [ADD] 매핑 실패도 더미
             if (!resolvedVisaId) {
-                console.debug("[VisaInfoMain] no resolvedVisaId -> using dummy", { country, visaCode });
                 if (alive) {
-                    setData(dummyRoadmapESTA);
-                    setErr(null);
+                    setErr("해당 비자 정보를 찾을 수 없습니다.");
+                    setData(null);
                     setLoading(false);
                 }
                 return;
             }
 
             try {
-                console.debug("[VisaInfoMain] fetching roadmap", { resolvedVisaId });
                 const res = await getRoadmapByIdApi(resolvedVisaId, { signal: controller.signal });
                 if (!alive) return;
                 setData(res);
                 setErr(null);
             } catch (e) {
-                console.error("[VisaInfoMain] fetch failed -> fallback to dummy", e);
+                console.error("[VisaInfoMain] fetch failed:", e);
                 if (!alive) return;
-                setData(dummyRoadmapESTA); // [MOD] 실패 시 즉시 더미
-                setErr(null);
+                setData(null);
+                setErr("비자 정보를 불러오지 못했습니다.");
             } finally {
                 if (alive) setLoading(false);
             }
@@ -123,8 +105,7 @@ export default function VisaInfoMain() {
             controller.abort();
         };
     }, [country, visaCode, resolvedVisaId]);
-
-    // section2의 모든 step을 체크리스트로 펼침
+    
     const checklist = useMemo(() => {
         if (!data) return [];
         const flat = data.section2.flatMap((s) => s.content);

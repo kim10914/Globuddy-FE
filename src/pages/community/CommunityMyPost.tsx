@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from "react";
 import CategoryHeader from "../../components/community/category/CategoryHeader";
 import PostsList from "../../components/community/PostsList";
 import { type CategoryKey, type Post, type MinePostItem } from "../../types";
-// import { DUMMY_POSTS } from "../../components/community/data"; // 더미
 import DeleteCard from "../../components/community/MyPost/DeleteCard";
 import { fetchMyPostsApi } from "../../api";
 // 서버 응답 -> UI Post 타입 변환기

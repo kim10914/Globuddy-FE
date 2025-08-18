@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { Post } from '../../types'
+import { togglePostLikeApi } from '../../api'
 
 import Heart from '../../assets/community/좋아요.svg'
 import ClickHeart from '../../assets/community/클릭좋아요.svg'
@@ -11,10 +12,10 @@ import CardOption from '../../assets/community/옵션.svg'
  * - Post의 필드에 화면 옵션을 추가
  */
 type CommunityPostCardProps = Post & {
-    showMenu?: boolean; // 내 글 화면 등에서 우측 상단 메뉴 노출
-    onMenuClick?: (id: Post["id"]) => void; // 메뉴 클릭 콜백(옵션)
-    disableNavigation?: boolean; // 링크 이동 활성화
-    navState?: any; // 라우팅 state 전달
+    showMenu?: boolean;
+    onMenuClick?: (id: Post["id"]) => void;
+    disableNavigation?: boolean;
+    navState?: any;
 };
 
 /**
@@ -25,21 +26,37 @@ type CommunityPostCardProps = Post & {
  */
 export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, likes, comments, showMenu = false, onMenuClick, disableNavigation = false, navState, }: CommunityPostCardProps) => {
     const [likeState, setLikeState] = useState({ isLiked: false, count: likes }); // 좋아요 표시
+    const [liking, setLiking] = useState(false); // 중복 클릭 방지
     const { category } = useParams<{ category: string }>();
     const navigate = useNavigate();
 
-    /** 좋아요 버튼 토글 핸들러 (아이콘 전환 + 카운트 증감) */
-    const handleToggleLike = () => {
-        setLikeState(prev => ({
-            isLiked: !prev.isLiked,
-            count: prev.count + (prev.isLiked ? -1 : 1),
-        }));
+    /** 좋아요 버튼 토글 */
+    const handleToggleLike: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
+        e.stopPropagation();
+        if (liking) return;
+        const prev = likeState;
+        const next = { isLiked: !prev.isLiked, count: prev.count + (prev.isLiked ? -1 : 1) };
+        setLikeState(next);
+        setLiking(true);
+        try {
+            await togglePostLikeApi(id);
+        } catch (err) {
+            setLikeState(prev);
+            console.error('toggle like failed:', err);
+        } finally {
+            setLiking(false);
+        }
     };
     /** 카드 클릭 핸들러 */
     const handleCardClick = () => {
         if (disableNavigation) return;
         const slug = category ?? 'general';
         navigate(`/board/${slug}/${id}`, { state: navState }); // state 전달
+    };
+    /** 댓글 버튼 클릭 시 상세로 이동 */
+    const handleCommentClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+        e.stopPropagation();
+        handleCardClick();
     };
     return (
         <div onClick={handleCardClick}
@@ -72,7 +89,7 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
             {/* 좋아요, 댓글 */}
             <div className="flex gap-[10px] items-center">
                 <div className="flex gap-[4px] items-center">
-                    <button type="button" onClick={handleToggleLike} >
+                    <button type="button" onClick={handleToggleLike} disabled={liking} >
                         <img src={likeState.isLiked ? ClickHeart : Heart} alt="Heart" />
                     </button>
                     <p className="text-[#82898F] text-[12px] font-normal">{likeState.count}</p>
@@ -81,7 +98,7 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
                 {/* 댓글 0개면 '안보임'*/}
                 {comments > 0 && (
                     <div className="flex gap-[4px] items-center">
-                        <button type="button">
+                        <button type="button" onClick={handleCommentClick}>
                             <img src={Message} alt="Message" />
                         </button>
                         <p className="text-[#82898F] text-[12px] font-normal">{comments}</p>

@@ -5,9 +5,9 @@ import LocationIcon from '../../../assets/roadmap/위치.svg'
 
 //선택/닫기 제어를 위한 props
 type LocationModalProps = {
-    open: boolean;                         // [ADD] 모달 노출 여부
-    onClose: () => void;                   // [ADD] 닫기 콜백
-    onSelect: (item: {                     // [ADD] 항목 선택 콜백 (추후 라우팅에 사용)
+    open: boolean;
+    onClose: () => void;
+    onSelect: (item: {
         name: string;
         hashtags: string[];
     }) => void;

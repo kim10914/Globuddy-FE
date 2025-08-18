@@ -15,6 +15,16 @@ const ACCESS_TOKEN_KEY = "accessToken";
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_TOKEN_KEY) ?? null;
 }
+/** 인기글 조회용 쿼리 타입(파일 지역 타입) */
+type PopularPostsQuery = PageableQuery & {
+  minCount?: number; // 좋아요 최소 값
+};
+
+/** 댓글 생성 바디 타입 */
+export interface CreateReplyRequest {
+  content: string;
+  isAnonymous: boolean;
+}
 
 /** 구글 로그인 인터페이스 */
 interface GoogleAuthResponse {
@@ -315,7 +325,7 @@ export async function getRoadmapByIdApi(
   return normalized;
 }
 /**
- * [추가] 체크리스트 항목 체크/해제 업데이트
+ * 체크리스트 항목 체크/해제 업데이트
  * POST /main/{id}/check
  */
 export async function updateChecklistApi(
@@ -334,7 +344,7 @@ export async function updateChecklistApi(
   return res.data as UpdateChecklistResponse;
 }
 /**
- * [추가] 국가 사진 조회
+ * 국가 사진 조회
  * GET /main/image
  */
 export async function fetchCountryImageApi(
@@ -349,7 +359,7 @@ export async function fetchCountryImageApi(
   return res.data as CountryImageResponse;
 }
 /**
- * [추가] 체크리스트 전체 조회
+ * 체크리스트 전체 조회
  * GET /main/checklist
  */
 export async function fetchChecklistApi(
@@ -362,4 +372,114 @@ export async function fetchChecklistApi(
     throw new Error(`Fetch checklist failed (status: ${res.status})`);
   }
   return res.data as ChecklistResponse;
+}
+/** 인기글 조회 */
+export async function fetchPopularPostsApi(
+  query?: PopularPostsQuery,
+  options?: { signal?: AbortSignal }
+): Promise<PostsListResponse> {
+  const {
+    minCount = 10,
+    page = 0,
+    size = 20,
+    sort = ["likeCount,desc", "createdAt,desc"], // 좋아요 우선, 최신순 보조
+  } = query ?? {};
+
+  // Spring 바인딩 호환
+  const params: Record<string, any> = {
+    minCount,
+    "pageable.page": page,
+    "pageable.size": size,
+    "pageable.sort": sort,
+  };
+
+  const res = await retryRequest(() =>
+    apiClient.get("/posts/all/popular", { params, signal: options?.signal })
+  );
+
+  if (res.status !== 200) {
+    throw new Error(`Fetch popular posts failed (status: ${res.status})`);
+  }
+
+  const raw = res.data ?? {};
+  const items: PostDetail[] = Array.isArray(raw.items)
+    ? raw.items.map((it: any) => normalizePost(it))
+    : [];
+
+  const pageMeta: PageMeta = {
+    number: Number(raw.page?.number ?? page),
+    size: Number(raw.page?.size ?? size),
+    totalElements: Number(raw.page?.totalElements ?? 0),
+    totalPages: Number(raw.page?.totalPages ?? 0),
+    hasNext: Boolean(raw.page?.hasNext ?? false),
+  };
+
+  return { items, page: pageMeta };
+}
+
+/** 좋아요 토글
+ * POST /posts/{id}/likes
+ * - 200 OK, 바디 없음
+ */
+export async function togglePostLikeApi(
+  id: number | string,
+  options?: { signal?: AbortSignal }
+): Promise<void> {
+  if (id === undefined || id === null || id === "") {
+    throw new Error("id는 필수입니다."); // [추가]
+  }
+  const res = await retryRequest(() =>
+    apiClient.post(`/posts/${id}/likes`, null, { signal: options?.signal }) // [추가]
+  );
+  if (res.status !== 200) {
+    throw new Error(`Toggle like failed (status: ${res.status})`); // [추가]
+  }
+  return; // [추가]
+}
+
+/** 댓글 생성
+ * POST /posts/replies/{postId}/create
+ * - 200 OK, 바디 없음
+ */
+export async function createReplyApi(
+  postId: number | string,
+  payload: CreateReplyRequest,
+  options?: { signal?: AbortSignal }
+): Promise<void> {
+  if (postId === undefined || postId === null || postId === "") {
+    throw new Error("postId는 필수입니다."); // [추가]
+  }
+  if (!payload?.content) {
+    throw new Error("content는 필수입니다."); // [추가]
+  }
+  const res = await retryRequest(() =>
+    apiClient.post(`/posts/replies/${postId}/create`, payload, {
+      signal: options?.signal,
+    })
+  );
+  if (res.status !== 200) {
+    throw new Error(`Create reply failed (status: ${res.status})`); // [추가]
+  }
+  return; // [추가]
+}
+
+/** 게시글 댓글 전체 조회
+ * GET /posts/{postId}/replies/view
+ * - 스웨거 예시는 {}(빈 객체)이므로 제네릭으로 열어둠
+ * - 백엔드 스키마 확정 시 T 타입 지정해서 사용
+ */
+export async function fetchPostRepliesApi<T = unknown>(
+  postId: number | string,
+  options?: { signal?: AbortSignal }
+): Promise<T> {
+  if (postId === undefined || postId === null || postId === "") {
+    throw new Error("postId는 필수입니다."); // [추가]
+  }
+  const res = await retryRequest(() =>
+    apiClient.get(`/posts/${postId}/replies/view`, { signal: options?.signal })
+  );
+  if (res.status !== 200) {
+    throw new Error(`Fetch replies failed (status: ${res.status})`); // [추가]
+  }
+  return res.data as T; // [추가]
 }
