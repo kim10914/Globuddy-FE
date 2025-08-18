@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import MyPageSettingMain from "../../components/mypage/MyPageSettingMain";
 
 export default function NotificationsPage() {
   const nav = useNavigate();
@@ -17,7 +16,7 @@ export default function NotificationsPage() {
         <h1 className="mx-auto text-center text-xl w-full">Notifications</h1>
       </nav>
       <main>
-        <MyPageSettingMain />
+        <h4>추가 예정입니다</h4>
       </main>
     </div>
   );

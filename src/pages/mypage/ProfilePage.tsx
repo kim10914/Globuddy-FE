@@ -5,12 +5,16 @@ import type { ChangeEvent } from "react";
 import Logout from "../../components/mypage/Logout";
 import MyPageNav from "../../components/mypage/MyPageNav";
 import editIcon from "../../assets/mypage/editprofile.png";
+import profileBg from "../../assets/mypage/Rectangle 2.svg";
 import BottomBar from "../../components/generic/BottomBar";
+import { getUserProfileApi } from "../../api";
 
 export default function ProfilePage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const data = getUserProfileApi();
+  console.log(data);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     //프로필 이미지
@@ -30,7 +34,7 @@ export default function ProfilePage() {
   };
   return (
     <div className="absolute inset-0 w-full h-full bg-black">
-      <h1 className="text-black p-4">my-page</h1>
+      <img src={profileBg} />
       <div
         className="
           absolute left-1/2 
