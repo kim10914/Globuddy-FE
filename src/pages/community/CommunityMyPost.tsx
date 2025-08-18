@@ -27,7 +27,6 @@ function adaptMineItemToPost(item: MinePostItem): Post {
  */
 export default function CommunityMyPost() {
     const { category } = useParams<{ category: string }>();
-    const myNickname = "Ivan"; // TODO: 실제 로그인 사용자 닉네임으로 교체
     const categoryKey = category as CategoryKey | undefined; // category가 CategoryKey인지 체크
 
     const [deleteOpen, setDeleteOpen] = useState(false); // 오픈?
@@ -74,7 +73,7 @@ export default function CommunityMyPost() {
         setDeleteOpen(false);
         loadMyPosts(); //삭제 반영된 목록 재조회
     }, [loadMyPosts]);
-    // 로딩/에러 상태 UI는 기존 emptyState를 활용하거나 상단에서 처리
+    // 로딩/에러 상태
     const emptyNode = (
         <p className="text-[#98A2B3] text-sm">
             {loading ? "불러오는 중..." : errorMsg ?? "작성한 게시글이 없습니다."}

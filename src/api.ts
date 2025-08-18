@@ -1,5 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
-import type { MinePostItem, PageMeta, MinePostsResponse } from "./types";
+import type { MinePostsResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
