@@ -11,6 +11,7 @@ import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
 import CommunityMyPost from "./pages/community/CommunityMyPost";
 import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
+import VisaSearch from "./pages/roadmap/VisaSearch";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <Route path="/board/:category/write" element={<CommunityWrite />} />
       <Route path="/board/:category/mine" element={<CommunityMyPost />} />
       <Route path="/road-map" element={<RoadmapFlights/>}/>
+      <Route path="/visa/:country" element={<VisaSearch />} />
       <Route
         path="/*"
         element={

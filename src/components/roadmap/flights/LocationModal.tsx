@@ -53,7 +53,7 @@ export default function LocationModal({ open, onClose, onSelect }: LocationModal
                 </div>
 
                 {/* 검색 결과 */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-[16px] pt-[20px]">
                     {results.map((item, idx) => (
                         <button
                             key={idx}
