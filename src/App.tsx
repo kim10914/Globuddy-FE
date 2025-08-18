@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
-import Signup from "./pages/Signup";
-import AuthCallbackPage from "./pages/AuthCallbackPage";
+import Signup from "./pages/login-page/Signup";
+import AuthCallbackPage from "./pages/login-page/AuthCallbackPage";
 import MainPage from "./pages/MainPage";
 import Community from "./pages/community/Community";
 import CommunityCategory from "./pages/community/CommunityCategory";
@@ -9,23 +9,32 @@ import CommunityWrite from "./pages/community/CommunityWrite";
 import ProfilePage from "./pages/mypage/ProfilePage";
 import SettingPage from "./pages/mypage/SettingsPage";
 import NotificationsPage from "./pages/mypage/NotificationsPage";
+import LoginOnboarding from "./pages/login-page/LoginOnboarding";
+import LoadingPage from "./pages/LoadingPage";
 import CommunityMyPost from "./pages/community/CommunityMyPost";
-
+import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
+import VisaSearch from "./pages/roadmap/VisaSearch";
+import VisaInfo from "./pages/roadmap/VisaInfo";
 
 function App() {
   const islogin: boolean = true;
 
   return (
     <Routes>
-
       <Route path="/" element={<MainPage />} />
+      <Route path="/loading" element={<LoadingPage />} />
       <Route path="/login" element={<Signup />} />
+      <Route path="/login/onboarding" element={<LoginOnboarding />} />
       <Route path="/community" element={<Community />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
+      <Route path="/oauth/kakao/redirect" element={<AuthCallbackPage />} />
       <Route path="/board/:category" element={<CommunityCategory />} />
       <Route path="/board/:category/:postId" element={<CommunityPost />} />
       <Route path="/board/:category/write" element={<CommunityWrite />} />
       <Route path="/board/:category/mine" element={<CommunityMyPost />} />
+      <Route path="/road-map" element={<RoadmapFlights />} />
+      <Route path="/visa/:country" element={<VisaSearch />} />
+      <Route path="/road-map/write" element={<VisaInfo />} />
       <Route
         path="/*"
         element={

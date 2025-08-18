@@ -3,9 +3,9 @@
 function getGoogleAuthURL(
   clientId: string,
   redirectUri: string,
-  scope = ["openid", "profile", "email"]
+  scope = ["openid", "email", "profile"]
 ) {
-  const base = "https://accounts.google.com/o/oauth2/v2/auth";
+  const base = "https://accounts.google.com/o/oauth2/auth";
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,

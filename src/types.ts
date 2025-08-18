@@ -63,4 +63,67 @@ export const CategoryInfo: Record<CategoryKey, CategoryData> = {
         description: "궁금한 건 모든지 얘기해보세요",
         tag: "#무물보 #오늘의TMI",
     },
-} as const; 
+} as const;
+
+/** 내 글 조회 인터페이스 */
+export interface MinePostItem {
+    id: number;
+    title: string;
+    content: string;
+    categoryId: number;
+    categoryName: string;
+    country: string;
+    userId: number;
+    name: string;            // 익명/실명 관계없이 사용자명 반환
+    hashtag?: string | null;
+    createdAt: string;
+    updatedAt?: string | null;
+    replyCount: number;      // 댓글 수
+    likeCount: number;       // 좋아요 수
+}
+/** 페이지 인터페이스 */
+export interface PageMeta {
+    number: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+/** 내글 조회하기  */
+export interface MinePostsResponse {
+    items: MinePostItem[];
+    page: PageMeta;
+}
+// PATCH /roadmap/visas 요청 바디 타입
+export interface PatchRoadmapVisaRequest {
+    country: string; // 예: "US"
+}
+
+// PATCH /roadmap/visas 응답 타입
+export interface PatchRoadmapVisaResponse {
+    id: number;
+    title: string | null;
+    content: string;
+    categoryId: number;
+    categoryName: string;
+    country: string;
+    userId: number;
+    name: string;
+    hashtag: string | null;
+    createdAt: string; // ISO-8601
+    updatedAt: string; // ISO-8601
+    replyCount: number;
+    likeCount: number;
+}
+/** 유저 비자 선택 및 로드맵 조회 */
+export interface RoadmapSection2Item {
+    subtitle: string;
+    content: string[];
+}
+export interface PatchRoadmapByIdResponse {
+    visaId: number;
+    description: string;
+    section1: string[];
+    section2: RoadmapSection2Item[];
+    section3: string[];
+}
