@@ -12,13 +12,23 @@ export function useAuthLoader() {
   }
 
   useEffect(() => {
+    // 이미 한 번 실행했다면 로딩 건너뜀
+    const hasRun = sessionStorage.getItem("authLoaderRun");
+    if (hasRun) {
+      setLoading(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (isLoggedIn()) {
-        navigate(-1); // 메인 이동
+        navigate("/"); // 메인 이동
       } else {
         navigate("/login"); // 로그인 이동
       }
       setLoading(false);
+
+      // 실행 여부 기록
+      sessionStorage.setItem("authLoaderRun", "true");
     }, 1500);
 
     return () => clearTimeout(timer);
