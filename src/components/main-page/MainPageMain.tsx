@@ -15,8 +15,8 @@ export default function MainPageMain() {
                 <p className=" text-[#1D2939] text-[18px] font-semibold">Useful Information</p>
                 <div className="flex gap-[40px] overflow-x-auto hide-scrollbar ">
                     {/* 링크는 노션 페이지 이동 -> 추후 수정 */}
-                    <InformationItem to="https://www.google.com/" img={Flights} label="Flights" />
-                    <InformationItem to="https://www.google.com/" img={Hotels} label="Hotels" />
+                    <InformationItem to="https://www.notion.so/Flights-25324ceeddc380408ae9fe81835b5e3b" img={Flights} label="Flights" />
+                    <InformationItem to="https://www.notion.so/Hotels-25324ceeddc3801c981ad7b211c87408" img={Hotels} label="Hotels" />
                     <InformationItem to="https://www.google.com/" img={Trains} label="Trains" />
                     <InformationItem to="https://www.google.com/" img={Ferry} label="Ferry" />
                     <InformationItem to="https://www.google.com/" img={Bus} label="Bus" />

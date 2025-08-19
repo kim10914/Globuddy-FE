@@ -1,47 +1,36 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import PostsList from "../PostsList";
-import { DUMMY_POSTS } from "../data";
 import type { Post, CategoryKey } from "../../../types";
 import { CategoryInfo } from "../../../types";
+import { fetchPostsByCategoryApi } from '../../../api'
+import {CATEGORY_ID_MAP , toUiPost} from '../data'
 
 import SearchIcon from '../../../assets/community/검색.svg'
 
+/** 유효성 체크 함수 */
+const isValidCategory = (x: string): x is CategoryKey => x in CategoryInfo;
 
 /**
- * (더미) 카테고리/키워드 기반 게시글 조회
- * 실제 API 연동 시 이 함수만 교체하면 됨.
- */
-const isValidCategory = (x: string): x is CategoryKey => {
-    return x in CategoryInfo;
-};
-/**
- * (더미) 카테고리/키워드 기반 게시글 조회
- * 실제 API 연동 시 이 함수만 교체하면 됨.
+ * 실제 API 기반 조회로 교체
  */
 async function fetchPostsByCategoryAndKeyword(category: CategoryKey, keyword: string): Promise<Post[]> {
-    // 실제 호출 예시:
-    // const data = await res.json(); return data.items as Post[];
-
-    // 더미 필터링
+    const categoryId = CATEGORY_ID_MAP[category]; // 서버 카테고리 ID
+    const { items } = await fetchPostsByCategoryApi(categoryId, {
+        page: 0,
+        size: 100,                 // 한 번에 100개까지
+        sort: ["createdAt,desc"],  // 최신순
+    });
     const kw = keyword.trim().toLowerCase();
-    const base = DUMMY_POSTS.filter((p) => p.category === category);
-    const toPost = (p: typeof DUMMY_POSTS[number]): Post => {
-        const { category: _c, ...rest } = p;
-        return rest;
-    };
+    const mapped = items.map(toUiPost);
+    if (!kw) return mapped;
 
-    if (!kw) return base.map(toPost);
-
-    return base
-        .filter(
-            (p) =>
-                p.nickname.toLowerCase().includes(kw) ||
-                p.content.toLowerCase().includes(kw)
-        )
-        .map(toPost);
+    return mapped.filter(
+        (p) =>
+            p.nickname.toLowerCase().includes(kw) ||
+            p.content.toLowerCase().includes(kw)
+    );
 }
-
 /**
  * 카테고리 목록 페이지 메인
  * - 상단 검색 입력(Enter로 검색 실행)
@@ -74,7 +63,6 @@ export default function CategoryMain() {
             return next;
         });
 
-        if (!category) return;
         try {
             setLoading(true);
             setError(null);
@@ -85,10 +73,10 @@ export default function CategoryMain() {
         } finally {
             setLoading(false);
         }
-    }, [category, keyword, setSearchParams]);
+    }, [categoryKey, keyword, setSearchParams]);
     // 카테고리/URL q 변경 시 초기 로드, 뒤로가기 대응
     useEffect(() => {
-        if (!category || !isValidCategory(category)) return;
+        if (!categoryKey) return;
         const q = searchParams.get("q") ?? "";
         setKeyword(q); // 입력값도 URL과 동기화
         let cancelled = false;
@@ -96,7 +84,7 @@ export default function CategoryMain() {
             try {
                 setLoading(true);
                 setError(null);
-                const result = await fetchPostsByCategoryAndKeyword(category, q);
+                const result = await fetchPostsByCategoryAndKeyword(categoryKey, q);
                 if (!cancelled) setPosts(result);
             } catch {
                 if (!cancelled) setError("목록을 불러오지 못했습니다.");

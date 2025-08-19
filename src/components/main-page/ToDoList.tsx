@@ -1,67 +1,111 @@
-import { useState } from "react";
+import { useEffect, useState } from "react"
+import { fetchChecklistApi, updateChecklistApi } from "../../api"
 
-import NoneChecked from "../../assets/generic/선택.svg";
-import Checked from "../../assets/generic/선택됨.svg";
-import NullToDo from "../../assets/main-page/ToDo없음.svg";
+import NoneChecked from '../../assets/generic/선택.svg'
+import Checked from '../../assets/generic/선택됨.svg'
+import NullToDo from '../../assets/main-page/ToDo없음.svg'
 
+/** 단일 아이템 props */
 type ToDoListItemsProps = {
-  checkbox?: string; // 미체크 이미지
-  checkedImg?: string; // 체크 이미지
-  nullImg?: string; // NullToDo 이미지
-  ToDo?: string | null; // 투두 텍스트(없으면 null 이미지 렌더)
-  defaultChecked?: boolean; // 초기 체크 상태(옵션)
-  onToggle?: (next: boolean) => void; // 체크 토글 콜백(옵션) -> 백엔드 연동용
-};
+    ToDo?: string | null
+    checked?: boolean
+    defaultChecked?: boolean
+    onToggle?: (next: boolean) => void
+}
+
 
 /**
  * ToDoList 컴포넌트
  */
 export const ToDoList = () => {
-  // 데모용 리스트
-  const todos = [
-    { id: 1, text: "공식 사이트 접속 → Individual Application", defaultChecked: false },
-    { id: 2, text: "이메일 인증코드 입력", defaultChecked: false },
-    { id: 3, text: "여권·개인·비상연락처 입력", defaultChecked: false },
-    { id: 4, text: "첫 숙소(또는 Transit 정보) & 미국 연락처 입력", defaultChecked: false },
-    { id: 5, text: "자격 질문 전부 확인", defaultChecked: false },
-    { id: 6, text: "자격 질문 전부 확인", defaultChecked: false },
-    { id: 7, text: "결제(21달러) → 제출", defaultChecked: false },
-    { id: 8, text: "신청번호 저장 & 72시간 내 승인 확인", defaultChecked: false },
-  ];
+    type Item = { id?: number | string; content: string; checked: boolean }
 
-  // 리스트가 비어있을 경우 NullToDo만 렌더
-  if (todos.length === 0) {
+    const [items, setItems] = useState<Item[]>([]) // 서버 데이터
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    // 마운트 시 ToDoList 불러오기
+    useEffect(() => {
+        let cancelled = false
+            ; (async () => {
+                try {
+                    setLoading(true)
+                    setError(null)
+                    const data = await fetchChecklistApi() as any
+                    // 백엔드 스키마 방어적 매핑 (id 필드명이 다를 가능성 고려)
+                    const list: Item[] = (Array.isArray(data?.checklist) ? data.checklist : []).map(
+                        (it: any, idx: number) => ({
+                            id: it?.id ?? it?.checkId ?? idx, // id 없으면 index 임시 키
+                            content: it?.content ?? "",
+                            checked: Boolean(it?.checked),
+                        })
+                    )
+                    if (!cancelled) setItems(list)
+                } catch {
+                    if (!cancelled) setError("체크리스트를 불러오지 못했습니다.")
+                } finally {
+                    if (!cancelled) setLoading(false)
+                }
+            })()
+        return () => { cancelled = true }
+    }, [])
+    // [추가] 토글 핸들러(낙관적 업데이트)
+    const handleToggle = async (id: Item["id"], next: boolean) => {
+        setItems(prev => prev.map(x => (x.id === id ? { ...x, checked: next } : x)))
+        try {
+            // id가 없다면 서버 호출을 건너뜀(로그만)
+            if (id === undefined || id === null || id === "") {
+                console.warn("Checklist item has no id. Skipped API update.")
+                return
+            }
+            await updateChecklistApi(id) // POST /main/{id}/check
+        } catch (e) {
+            // 실패 시 롤백
+            setItems(prev => prev.map(x => (x.id === id ? { ...x, checked: !next } : x)))
+            console.error(e)
+        }
+    }
+    if (loading) {
+        return (
+            <div className="bg-white h-[385px] py-[24px] px-[20px] flex flex-col gap-[9px]">
+                <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
+                <p className="text-[#98A2B3] text-sm">불러오는 중…</p>
+            </div>
+        )
+    }
+    if (error) {
+        return (
+            <div className="bg-white h-[385px] py-[24px] px-[20px] flex flex-col gap-[9px]">
+                <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
+                <p className="text-red-500 text-sm">{error}</p>
+            </div>
+        )
+    }
+    // 리스트가 비어있을 경우 NullToDo만 렌더
+    if (!items.length) {
+        return (
+            <div className="bg-white h-[360px] py-[24px] px-[20px] flex flex-col gap-[16px] rounded-[4px]">
+                <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
+                <img src={NullToDo} alt="todo-null" data-testid="null-image" />
+            </div>
+        )
+    }
     return (
-      <div className="bg-white h-[360px] py-[24px] px-[20px] flex flex-col gap-[16px] rounded-[4px]">
-        <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
-        <img src={NullToDo} alt="todo-null" data-testid="null-image" />
-      </div>
-    );
-  }
-  const handleToggleFactory = (id: number) => (next: boolean) => {
-    // TODO: 백엔드 반영 예정 위치
-    // 예: await fetch(`/api/todos/${id}`, { method: 'PATCH', body: JSON.stringify({ checked: next }) });
-    console.log("toggle", id, next);
-  };
-  return (
-    <div className="bg-white h-[385px] py-[24px] px-[20px] flex flex-col gap-[9px] ">
-      <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
-      <div className="flex flex-col gap-[12px] overflow-y-auto hide-scrollbar">
-        {todos.map((t) => (
-          <ToDoListItems
-            key={t.id}
-            ToDo={t.text}
-            defaultChecked={t.defaultChecked}
-            onToggle={handleToggleFactory(t.id)}
-            checkbox={NoneChecked}
-            checkedImg={Checked}
-            nullImg={NullToDo}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
+        <div className="bg-white h-[385px] py-[24px] px-[20px] flex flex-col gap-[9px] ">
+            <p className="font-semibold text-[#1D2939] text-[18px]">To Do List</p>
+            <div className="flex flex-col gap-[12px] overflow-y-auto hide-scrollbar">
+                {items.map((t) => (
+                    <ToDoListItems
+                        key={String(t.id)}
+                        ToDo={t.content}
+                        checked={t.checked} // controlled로 전달
+                        onToggle={(next) => handleToggle(t.id, next)}
+                    />
+                ))}
+            </div>
+        </div>
+    )
+}
 
 /**
  * 단일 아이템
@@ -72,51 +116,39 @@ export const ToDoList = () => {
  * @param {boolean} defaultChecked? 기본 채크 상태
  * @param {void} onToggle 채크 시 백엔드에 patch하는 함수
  */
-export const ToDoListItems = ({
-  checkbox = NoneChecked,
-  checkedImg = Checked,
-  nullImg = NullToDo,
-  ToDo,
-  defaultChecked = false,
-  onToggle,
-}: ToDoListItemsProps) => {
-  const [checked, setChecked] = useState(defaultChecked); // 초기값
-  // ToDo가 없을 경우 NullToDo 이미지만 반환
-  if (!ToDo || ToDo.trim().length === 0) {
+export const ToDoListItems = ({ ToDo, checked, defaultChecked = false, onToggle }: ToDoListItemsProps) => {
+    const [innerChecked, setInnerChecked] = useState(defaultChecked)
+    const isChecked = checked ?? innerChecked
+    const currentSrc = isChecked ? Checked : NoneChecked
+
+    // ToDo가 없을 경우 NullToDo 이미지만 반환
+    if (!ToDo || ToDo.trim().length === 0) {
+        return (
+            <img
+                src={NullToDo}
+                alt="todo-null"
+                data-testid="null-image"
+            />
+        )
+    }
+    /** 체크박스 토글 */
+    const handleToggle = () => {
+        const next = !isChecked
+        if (checked === undefined) {
+            setInnerChecked(next) // uncontrolled일 때만 내부 상태 갱신
+        }
+        onToggle?.(next) // 서버 업데이트 호출
+    }
     return (
-      <img
-        src={nullImg}
-        alt="todo-null" // 변경: 테스트용 고정 alt
-        data-testid="null-image" // 변경: 테스트용 id
-      />
-    );
-  }
-  const currentSrc = checked ? checkedImg : checkbox; // 체크 상태
-  /** 채크박스 토글 */
-  const handleToggle = () => {
-    const next = !checked;
-    setChecked(next);
-    onToggle?.(next);
-  };
-  return (
-    <div className="flex bg-[#F2F4F7] rounded-[8px] gap-[8px] p-[8px] flex-none">
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-pressed={checked}
-        aria-label="toggle-todo"
-        data-testid="toggle-button"
-      >
-        <img
-          src={currentSrc}
-          alt={checked ? "todo-checked" : "todo-unchecked"}
-          data-testid="checkbox-image"
-          className="h-[24px] w-[24px]"
-        />
-      </button>
-      <p className="text-[#475467] text-[14px] font-medium">{ToDo}</p>
-    </div>
-  );
-};
+        <div className="flex bg-[#F2F4F7] rounded-[8px] gap-[8px] p-[8px] flex-none">
+            <button type="button" onClick={handleToggle}>
+                <img
+                    src={currentSrc} alt={checked ? "todo-checked" : "todo-unchecked"} className="h-[24px] w-[24px]"
+                />
+            </button>
+            <p className="text-[#475467] text-[14px] font-medium">{ToDo}</p>
+        </div>
+    )
+}
 
 export default ToDoList;
