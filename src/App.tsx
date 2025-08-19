@@ -24,27 +24,28 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<MainPage />} />
       <Route path="/loading" element={<LoadingPage />} />
       <Route path="/login" element={<Signup />} />
       <Route path="/login/onboarding" element={<LoginOnboarding />} />
-      <Route path="/community" element={<Community />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
       <Route path="/oauth/kakao/redirect" element={<AuthCallbackPage />} />
-      <Route path="/board/:category" element={<CommunityCategory />} />
-      <Route path="/board/:category/:postId" element={<CommunityPost />} />
-      <Route path="/board/:category/write" element={<CommunityWrite />} />
-      <Route path="/board/:category/mine" element={<CommunityMyPost />} />
-      <Route path="/road-map" element={<RoadmapFlights />} />
-      <Route path="/visa/:country" element={<VisaSearch />} />
-      <Route path="/road-map/write" element={<VisaInfo />} />
+
       <Route
         path="/*"
         element={
           isLoggedIn() ? ( //로그인 상태시 접근 가능 페이지들 입니다
             <Routes>
+              <Route path="/" element={<MainPage />} />
               <Route path="/profile" element={<ProfilePage />}></Route>
               <Route path="/profile/setting" element={<SettingPage />}></Route>
+              <Route path="/community" element={<Community />} />
+              <Route path="/board/:category" element={<CommunityCategory />} />
+              <Route path="/board/:category/:postId" element={<CommunityPost />} />
+              <Route path="/board/:category/write" element={<CommunityWrite />} />
+              <Route path="/board/:category/mine" element={<CommunityMyPost />} />
+              <Route path="/road-map" element={<RoadmapFlights />} />
+              <Route path="/visa/:country" element={<VisaSearch />} />
+              <Route path="/road-map/write" element={<VisaInfo />} />
               <Route
                 path="/profile/notifications"
                 element={<NotificationsPage />}
