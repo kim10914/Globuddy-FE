@@ -93,14 +93,11 @@ export function getUserId(): string | null {
  * @param {string} code Google 로그인 후 받은 허가 코드
  * @returns {Promise<GoogleAuthResponse>} 백엔드에서 반환된 응답 데이터
  */
-export async function googleAuthLoginApi(
-  code: string
-): Promise<GoogleAuthResponse> {
-  const response = await apiClient.post<GoogleAuthResponse>(
-    "https://spring.jinwook.shop/google/doLogin",
-    { code }
+export async function googleAuthLoginApi(code: string) {
+  const res = await retryRequest(() =>
+    apiClient.post("/member/google/doLogin", { code }) // URL 수정
   );
-  return response.data;
+  return res.data;
 }
 
 /** 카카오 로그인 API 호출 - 인증 후 받은 코드를 백엔드로 전송
