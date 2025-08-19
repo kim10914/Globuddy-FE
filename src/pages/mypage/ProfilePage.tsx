@@ -17,7 +17,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     getUserProfileApi().then(setProfile).catch(console.error); //유저정보 조회
-    console.log(profile);
   }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
