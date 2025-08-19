@@ -16,7 +16,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
 
   useEffect(() => {
-    getUserProfileApi().then(setProfile).catch(console.error);
+    getUserProfileApi().then(setProfile).catch(console.error); //유저정보 조회
     console.log(profile);
   }, []);
 
