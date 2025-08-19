@@ -32,7 +32,12 @@ interface GoogleAuthResponse {
   token?: string; // 토큰
   error?: string; // 에러
 }
-
+// AxiosRequestConfig에 커스텀 플래그 사용
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    authRequired?: boolean; // 기본 true
+  }
+}
 /** 기본 API 호출 설정 - API 호출 시 공통적으로 사용할 설정을 정의 */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -40,6 +45,7 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    withCredentials: true,
   },
   // withCredentials: true, // 쿠키 인증
 });
@@ -76,14 +82,16 @@ export const retryRequest = async <T>(
   }
 };
 /** 요청 인터셉터 - 매 요청마다 Authorization 자동 첨부 */
-apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig & { authRequired?: boolean }) => {
   const token = getAccessToken();
-  if (token) {
-    // headers가 AxiosHeaders 객체일 수 있으므로 안전하게 set
-    if (config.headers) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-      config.headers["X-AUTH-TOKEN"] = token;
-    }
+  const needAuth = config.authRequired ?? true; // [추가]
+  if (needAuth && token && config.headers) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+    config.headers["X-AUTH-TOKEN"] = token;
+  } else if (config.headers) {
+    // 명시적으로 인증 해더 제거
+    delete (config.headers as any)["Authorization"];
+    delete (config.headers as any)["X-AUTH-TOKEN"];
   }
   return config;
 });
