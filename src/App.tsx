@@ -15,16 +15,28 @@ import CommunityMyPost from "./pages/community/CommunityMyPost";
 import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
 import VisaSearch from "./pages/roadmap/VisaSearch";
 import VisaInfo from "./pages/roadmap/VisaInfo";
-import { useAuthLoader } from "./utils/lodingUtil";
+import { useEffect, useState } from "react";
 
 function App() {
   function isLoggedIn() {
     const token = localStorage.getItem("accessToken");
     return !!token;
   }
-  const loading = useAuthLoader();
+  const [showSplash, setShowSplash] = useState(true);
 
-  if (loading) return <LoadingPage />;
+  useEffect(() => {
+    const hasShown = sessionStorage.getItem("splashShown");
+    if (hasShown) {
+      setShowSplash(false);
+    } else {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem("splashShown", "true");
+      }, 1500); // 1.5초 후 스플래시 종료
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  if (showSplash) return <LoadingPage />;
 
   return (
     <Routes>
