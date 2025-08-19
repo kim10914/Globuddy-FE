@@ -45,9 +45,8 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    withCredentials: true,
+    // withCredentials: true, // 쿠키
   },
-  // withCredentials: true, // 쿠키 인증
 });
 
 /**
