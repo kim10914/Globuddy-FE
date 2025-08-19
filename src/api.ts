@@ -1,10 +1,22 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import type {
-  MinePostsResponse, PatchRoadmapVisaRequest, PatchRoadmapVisaResponse, PatchRoadmapByIdResponse, RoadmapSection2Item, CreatePostRequest,
-  PostDetail, PageableQuery, PostsListResponse, PageMeta, UpdateChecklistResponse, CountryImageResponse, ChecklistResponse
+  MinePostsResponse,
+  PatchRoadmapVisaRequest,
+  PatchRoadmapVisaResponse,
+  PatchRoadmapByIdResponse,
+  RoadmapSection2Item,
+  CreatePostRequest,
+  PostDetail,
+  PageableQuery,
+  PostsListResponse,
+  PageMeta,
+  UpdateChecklistResponse,
+  CountryImageResponse,
+  ChecklistResponse,
 } from "./types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"; // 기본 통신 API 주소
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
@@ -124,7 +136,9 @@ export async function kakaoAuthLoginApi(
 
 /** 게시글 삭제 */
 export async function deletePostApi(postId: number | string): Promise<void> {
-  const res = await retryRequest(() => apiClient.delete(`/posts/delete/${postId}`));
+  const res = await retryRequest(() =>
+    apiClient.delete(`/posts/delete/${postId}`)
+  );
   if (res.status !== 204 && res.status !== 200) {
     throw new Error(`Delete failed (status: ${res.status})`);
   }
@@ -207,10 +221,13 @@ export async function fetchAllPostsApi(
   const res = await retryRequest(() =>
     apiClient.get("/posts/all", { params, signal: options?.signal })
   );
-  if (res.status !== 200) throw new Error(`Fetch all posts failed (status: ${res.status})`);
+  if (res.status !== 200)
+    throw new Error(`Fetch all posts failed (status: ${res.status})`);
 
   const raw = res.data ?? {};
-  const items = Array.isArray(raw.items) ? raw.items.map((it: any) => normalizePost(it)) : [];
+  const items = Array.isArray(raw.items)
+    ? raw.items.map((it: any) => normalizePost(it))
+    : [];
   const pageMeta: PageMeta = {
     number: Number(raw.page?.number ?? page),
     size: Number(raw.page?.size ?? size),
@@ -220,7 +237,7 @@ export async function fetchAllPostsApi(
   };
   return { items, page: pageMeta };
 }
-/** 
+/**
  * [추가] 카테고리별 전체 게시글 조회
  * GET /posts/all/{categoryId}
  * 쿼리: pageable.page, pageable.size, pageable.sort[]
@@ -235,11 +252,7 @@ export async function fetchPostsByCategoryApi(
   }
 
   // 기본값 (재사용성 위해 PageableQuery 타입 사용)
-  const {
-    page = 0,
-    size = 20,
-    sort = ["createdAt,desc"],
-  } = pageable ?? {};
+  const { page = 0, size = 20, sort = ["createdAt,desc"] } = pageable ?? {};
 
   // Spring(스웨거)의 'pageable' 객체를 안전하게 매핑: pageable.page / pageable.size / pageable.sort
   const params: Record<string, any> = {
@@ -310,11 +323,11 @@ export async function getRoadmapByIdApi(
     section1: Array.isArray(raw.section1) ? raw.section1 : [],
     section2: Array.isArray(raw.section2)
       ? raw.section2.map(
-        (it: any): RoadmapSection2Item => ({
-          subtitle: it?.subtitle ?? "",
-          content: Array.isArray(it?.content) ? it.content : [],
-        })
-      )
+          (it: any): RoadmapSection2Item => ({
+            subtitle: it?.subtitle ?? "",
+            content: Array.isArray(it?.content) ? it.content : [],
+          })
+        )
       : [],
     section3: Array.isArray(raw.section3) ? raw.section3 : [],
   };
@@ -323,12 +336,9 @@ export async function getRoadmapByIdApi(
 }
 
 export interface UserProfileResponse {
-  id: number;
-  email: string;
-  nickname: string;
-  avatarUrl?: string;
-  createdAt: string;
-  updatedAt: string;
+  profileImage: string;
+  profileName: string;
+  profileEmail: string;
 }
 
 /**
@@ -364,9 +374,9 @@ export async function updateChecklistApi(
  * 국가 사진 조회
  * GET /main/image
  */
-export async function fetchCountryImageApi(
-  options?: { signal?: AbortSignal }
-): Promise<CountryImageResponse> {
+export async function fetchCountryImageApi(options?: {
+  signal?: AbortSignal;
+}): Promise<CountryImageResponse> {
   const res = await retryRequest(() =>
     apiClient.get("/main/image", { signal: options?.signal })
   );
@@ -379,9 +389,9 @@ export async function fetchCountryImageApi(
  * 체크리스트 전체 조회
  * GET /main/checklist
  */
-export async function fetchChecklistApi(
-  options?: { signal?: AbortSignal }
-): Promise<ChecklistResponse> {
+export async function fetchChecklistApi(options?: {
+  signal?: AbortSignal;
+}): Promise<ChecklistResponse> {
   const res = await retryRequest(() =>
     apiClient.get("/main/checklist", { signal: options?.signal })
   );
@@ -445,8 +455,9 @@ export async function togglePostLikeApi(
   if (id === undefined || id === null || id === "") {
     throw new Error("id는 필수입니다."); // [추가]
   }
-  const res = await retryRequest(() =>
-    apiClient.post(`/posts/${id}/likes`, null, { signal: options?.signal }) // [추가]
+  const res = await retryRequest(
+    () =>
+      apiClient.post(`/posts/${id}/likes`, null, { signal: options?.signal }) // [추가]
   );
   if (res.status !== 200) {
     throw new Error(`Toggle like failed (status: ${res.status})`); // [추가]
