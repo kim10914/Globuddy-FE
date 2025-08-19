@@ -15,12 +15,16 @@ import CommunityMyPost from "./pages/community/CommunityMyPost";
 import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
 import VisaSearch from "./pages/roadmap/VisaSearch";
 import VisaInfo from "./pages/roadmap/VisaInfo";
+import { useAuthLoader } from "./utils/lodingUtil";
 
 function App() {
   function isLoggedIn() {
     const token = localStorage.getItem("accessToken");
-    return !!token; // 있으면 true !!token
+    return !!token;
   }
+  const loading = useAuthLoader();
+
+  if (loading) return <LoadingPage />;
 
   return (
     <Routes>
