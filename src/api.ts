@@ -15,8 +15,8 @@ import type {
   ChecklistResponse,
 } from "./types";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"; // 기본 통신 API 주소
+const API_BASE_URL = "/api" // 프록시 설정
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
@@ -132,7 +132,7 @@ export async function kakaoAuthLoginApi(
   code: string
 ): Promise<GoogleAuthResponse> {
   const response = await apiClient.post<GoogleAuthResponse>(
-    "https://spring.jinwook.shop/kakao/doLogin",
+    "/kakao/doLogin", // 절대 URL 제거
     { code }
   );
   return response.data;
@@ -327,11 +327,11 @@ export async function getRoadmapByIdApi(
     section1: Array.isArray(raw.section1) ? raw.section1 : [],
     section2: Array.isArray(raw.section2)
       ? raw.section2.map(
-          (it: any): RoadmapSection2Item => ({
-            subtitle: it?.subtitle ?? "",
-            content: Array.isArray(it?.content) ? it.content : [],
-          })
-        )
+        (it: any): RoadmapSection2Item => ({
+          subtitle: it?.subtitle ?? "",
+          content: Array.isArray(it?.content) ? it.content : [],
+        })
+      )
       : [],
     section3: Array.isArray(raw.section3) ? raw.section3 : [],
   };
