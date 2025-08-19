@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
         return;
       }
       const response = await googleAuthLoginApi(code);
-      if (response.success && response.token) {
+      if (response.token) {
         // 로그인 성공 처리
         localStorage.setItem("accessToken", response.token);
         navigate("/login/onboarding");
