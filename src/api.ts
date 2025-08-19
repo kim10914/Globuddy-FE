@@ -423,9 +423,12 @@ export async function fetchPopularPostsApi(
     "pageable.size": size,
     "pageable.sort": sort,
   };
-
+  /** 인기글 조회 */
   const res = await retryRequest(() =>
-    apiClient.get("/posts/all/popular", { params, signal: options?.signal, authRequired: false, })
+    apiClient.get("/posts/all/popular", {
+      params,
+      signal: options?.signal,
+    })
   );
 
   if (res.status !== 200) {
