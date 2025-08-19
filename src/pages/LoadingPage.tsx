@@ -13,7 +13,7 @@ export default function LoadingPage() {
 
       if (token) {
         // 로그인 상태면 → 원래 가려던 페이지 유지
-        navigate(location.pathname === "/splash" ? "/" : location.pathname, {
+        navigate(location.pathname === "/loading" ? "/" : location.pathname, {
           replace: true,
         });
       } else {
