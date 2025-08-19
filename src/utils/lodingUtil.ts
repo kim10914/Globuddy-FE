@@ -14,7 +14,7 @@ export function useAuthLoader() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoggedIn()) {
-        navigate("/"); // 메인 이동
+        navigate(-1); // 메인 이동
       } else {
         navigate("/login"); // 로그인 이동
       }
