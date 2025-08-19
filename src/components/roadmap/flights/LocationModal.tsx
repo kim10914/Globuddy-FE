@@ -23,6 +23,7 @@ export default function LocationModal({ open, onClose, onSelect }: LocationModal
         { name: "United States of America", hashtags: ["America", "USA", "United States of America"] },
         { name: "China", hashtags: ["China", "PRC"] },
         { name: "Japan", hashtags: ["Japan", "Nippon"] },
+        { name: "Canada", hashtags: ["Canada", "Autumn leaves"] },
     ];
 
     const handleSearch = (value: string) => {

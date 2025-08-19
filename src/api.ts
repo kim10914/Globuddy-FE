@@ -4,8 +4,7 @@ import type {
   PostDetail, PageableQuery, PostsListResponse, PageMeta, UpdateChecklistResponse, CountryImageResponse, ChecklistResponse
 } from "./types";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "https://localhost:8080"; // 기본 통신 API 주소
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"; // 기본 통신 API 주소
 const API_TIME_OUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 10000); // TimeOut 시간
 const API_RETRY_COUNT = Number(import.meta.env.VITE_API_RETRY_COUNT ?? 3); // 재시도 횟수
 const USER_ID_KEY = "userId"; // 유저 아이디(미정)
@@ -42,7 +41,7 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: true,
+  // withCredentials: true, // 쿠키 인증
 });
 
 /**
@@ -100,14 +99,26 @@ export function getUserId(): string | null {
  * @param {string} code Google 로그인 후 받은 허가 코드
  * @returns {Promise<GoogleAuthResponse>} 백엔드에서 반환된 응답 데이터
  */
-export async function googleAuthLoginApi(
-  code: string
-): Promise<GoogleAuthResponse> {
-  const response = await apiClient.post<GoogleAuthResponse>(
-    "https://spring.jinwook.shop/google/doLogin",
-    { code }
+// export async function googleAuthLoginApi(
+//   code: string
+// ): Promise<GoogleAuthResponse> {
+//   const response = await apiClient.post<GoogleAuthResponse>(
+//     "https://spring.jinwook.shop/google/doLogin",
+//     { code }
+//   );
+//   return response.data;
+// }
+export interface GoogleDoLoginResponse {
+  token?: string;
+  success?: boolean;
+  // 서버가 다른 필드를 내려줄 수 있으므로 확장 가능
+  [key: string]: any;
+}
+export async function googleAuthLoginApi(code: string): Promise<GoogleDoLoginResponse> {
+  const res = await retryRequest(() =>
+    apiClient.post<GoogleDoLoginResponse>("/member/google/doLogin", { code })
   );
-  return response.data;
+  return res.data;
 }
 
 /** 카카오 로그인 API 호출 - 인증 후 받은 코드를 백엔드로 전송
@@ -126,19 +137,10 @@ export async function kakaoAuthLoginApi(
 
 /** 게시글 삭제 */
 export async function deletePostApi(postId: number | string): Promise<void> {
-  // [추가]
-  const path = `/posts/delete/${postId}`;
-  await retryRequest(async () => {
-    const res = await apiClient.delete(path);
-    // 반환값 없음, 204가 정상
-    if (res.status !== 204) {
-      // 서버가 body 없이 다른 코드로 응답할 수도 있으므로 메시지 보강
-      const err = new Error(`Delete failed (status: ${res.status})`);
-      // Axios 에러로 던져서 상위에서 통일 처리
-      throw err;
-    }
-    return;
-  });
+  const res = await retryRequest(() => apiClient.delete(`/posts/delete/${postId}`));
+  if (res.status !== 204 && res.status !== 200) {
+    throw new Error(`Delete failed (status: ${res.status})`);
+  }
 }
 /** 게시글 응답 표준화 유틸 */
 function normalizePost(raw: any): PostDetail {
@@ -207,35 +209,21 @@ export async function fetchAllPostsApi(
   pageable?: PageableQuery,
   options?: { signal?: AbortSignal }
 ): Promise<PostsListResponse> {
-  // 기본값 세팅
-  const {
-    page = 0,
-    size = 20,
-    sort = ["createdAt,desc"],
-  } = pageable ?? {};
+  const { page = 0, size = 20, sort = ["createdAt,desc"] } = pageable ?? {};
 
-  // 스웨거가 "pageable" 객체로 받으므로, 쿼리 키를 맞춰 전송
-  const params = {
-    pageable: {
-      page,
-      size,
-      sort,
-    },
+  const params: Record<string, any> = {
+    "pageable.page": page,
+    "pageable.size": size,
   };
+  params["pageable.sort"] = sort; // 여러 개 허용
 
   const res = await retryRequest(() =>
     apiClient.get("/posts/all", { params, signal: options?.signal })
   );
-
-  if (res.status !== 200) {
-    throw new Error(`Fetch all posts failed (status: ${res.status})`);
-  }
+  if (res.status !== 200) throw new Error(`Fetch all posts failed (status: ${res.status})`);
 
   const raw = res.data ?? {};
-  const items: PostDetail[] = Array.isArray(raw.items)
-    ? raw.items.map((it: any) => normalizePost(it))
-    : [];
-
+  const items = Array.isArray(raw.items) ? raw.items.map((it: any) => normalizePost(it)) : [];
   const pageMeta: PageMeta = {
     number: Number(raw.page?.number ?? page),
     size: Number(raw.page?.size ?? size),
@@ -243,7 +231,6 @@ export async function fetchAllPostsApi(
     totalPages: Number(raw.page?.totalPages ?? 0),
     hasNext: Boolean(raw.page?.hasNext ?? false),
   };
-
   return { items, page: pageMeta };
 }
 /** 
