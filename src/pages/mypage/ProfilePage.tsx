@@ -1,20 +1,23 @@
 //프로필 페이지 메인 입니다
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import Logout from "../../components/mypage/Logout";
 import MyPageNav from "../../components/mypage/MyPageNav";
 import editIcon from "../../assets/mypage/editprofile.png";
 import profileBg from "../../assets/mypage/Rectangle 2.svg";
 import BottomBar from "../../components/generic/BottomBar";
-import { getUserProfileApi } from "../../api";
+import { getUserProfileApi, type UserProfileResponse } from "../../api";
 
 export default function ProfilePage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const data = getUserProfileApi();
-  console.log(data);
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null);
+
+  useEffect(() => {
+    getUserProfileApi().then(setProfile).catch(console.error); //유저정보 조회
+  }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     //프로필 이미지
@@ -44,7 +47,7 @@ export default function ProfilePage() {
         "
       >
         <img
-          src={preview || ""}
+          src={preview || profile?.profileImage || ""}
           alt="프로필"
           className="w-24 h-24 rounded-full shadow-lg object-cover bg-gray-300 cursor-pointer"
           onClick={handleClickEdit}
@@ -65,7 +68,7 @@ export default function ProfilePage() {
         />
       </div>
       <main>
-        <MyPageNav setShowLogoutModal={setShowLogoutModal} />
+        <MyPageNav setShowLogoutModal={setShowLogoutModal} profile={profile} />
         {showLogoutModal ? (
           <Logout setShowLogoutModal={setShowLogoutModal} />
         ) : (
