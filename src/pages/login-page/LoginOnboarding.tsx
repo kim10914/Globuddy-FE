@@ -7,10 +7,18 @@ import LocationModal from "../../components/roadmap/flights/LocationModal";
 import { patchRoadmapVisaApi } from "../../api";
 import { useNavigate } from "react-router-dom";
 
+const toSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-");
+
 const countryMap: Record<string, { code: string; slug: string }> = {
   "United States of America": { code: "US", slug: "usa" },
+  USA: { code: "US", slug: "usa" },
   China: { code: "CN", slug: "chn" },
   Japan: { code: "JP", slug: "jpn" },
+  Canada: { code: "CA", slug: "cnd" },
 };
 
 export default function LoginOnboarding() {
@@ -34,18 +42,20 @@ export default function LoginOnboarding() {
     closeModal();
 
     // 매핑에서 코드/슬러그 찾기 (없으면 안전한 fallback)
-    const info = countryMap[item.name];
-    const countryCode = info?.code;
+    const match = countryMap[item.name];
+    const countryCode = match?.code;
+    const countrySlug = match?.slug ?? toSlug(item.name);
+
     try {
       if (countryCode) {
-        await patchRoadmapVisaApi({ country: countryCode }); // API 호출
+        await patchRoadmapVisaApi({ country: countryCode });
       }
     } catch (e) {
-      // 서버 설정이 실패해도 페이징은 진행 (로그만 남김)
+      // 서버 설정 실패해도 라우팅은 진행
       console.error("patchRoadmapVisaApi failed:", e);
     } finally {
       setSubmitting(false);
-      navigate("/");
+      navigate(`/visa/${countrySlug}`);
     }
   };
 
@@ -83,7 +93,7 @@ export default function LoginOnboarding() {
               {pickedLocation ?? "Where do you want to go?"}
             </span>
           </button>
-          <section className="bg-[#F9FAFB] rounded-[6px] py-[10px] px-[16px]">
+          <section className="bg-[#F9FAFB] rounded-[6px] py-[10px] px-[50px]">
             <CountryCardList />
           </section>
           {/* 위치 선택 모달 */}

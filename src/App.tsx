@@ -15,15 +15,23 @@ import CommunityMyPost from "./pages/community/CommunityMyPost";
 import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
 import VisaSearch from "./pages/roadmap/VisaSearch";
 import VisaInfo from "./pages/roadmap/VisaInfo";
+import { useAuthLoader } from "./utils/lodingUtil";
 
 function App() {
   function isLoggedIn() {
     const token = localStorage.getItem("accessToken");
-    return !!token; // 있으면 true !!token
+    return !!token;
   }
+  const loading = useAuthLoader();
+
+  if (loading) return <LoadingPage />;
 
   return (
     <Routes>
+      <Route
+        path="/"
+        element={isLoggedIn() ? <MainPage /> : <Navigate to="/login" replace />}
+      />
       <Route path="/loading" element={<LoadingPage />} />
       <Route path="/login" element={<Signup />} />
       <Route path="/login/onboarding" element={<LoginOnboarding />} />
@@ -40,9 +48,18 @@ function App() {
               <Route path="/profile/setting" element={<SettingPage />}></Route>
               <Route path="/community" element={<Community />} />
               <Route path="/board/:category" element={<CommunityCategory />} />
-              <Route path="/board/:category/:postId" element={<CommunityPost />} />
-              <Route path="/board/:category/write" element={<CommunityWrite />} />
-              <Route path="/board/:category/mine" element={<CommunityMyPost />} />
+              <Route
+                path="/board/:category/:postId"
+                element={<CommunityPost />}
+              />
+              <Route
+                path="/board/:category/write"
+                element={<CommunityWrite />}
+              />
+              <Route
+                path="/board/:category/mine"
+                element={<CommunityMyPost />}
+              />
               <Route path="/road-map" element={<RoadmapFlights />} />
               <Route path="/visa/:country" element={<VisaSearch />} />
               <Route path="/road-map/write" element={<VisaInfo />} />

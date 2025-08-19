@@ -21,6 +21,7 @@ export default function AuthCallbackPage() {
       if (response.token) {
         // 로그인 성공 처리
         localStorage.setItem("accessToken", response.token);
+        localStorage.setItem("USER_ID_KEY", response.id);
         navigate("/login/onboarding");
       } else {
         // 로그인 실패 처리

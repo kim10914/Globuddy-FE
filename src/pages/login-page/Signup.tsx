@@ -22,14 +22,14 @@ export default function Signup() {
           className="absolute bottom-0 w-full h-1/3 flex flex-col shadow rounded-t-xl p-5"
         >
           <div className="space-y-4 flex flex-col justify-center items-center ">
-            <h2 className="text-[#0078E6] text-2xl p-5 font-bold">
+            <h2 className="text-[#0078E6] text-2xl pt-5 font-bold">
               Ready to explore
             </h2>
             <button
               onClick={() => {
                 onGoogleLoginClick();
               }}
-              className="flex flex-row m-1 w-full border-2 rounded-sm p-2 border-[#1E24323B]"
+              className="flex flex-row m-1 w-full border-2 rounded-lg p-2 mb-4 border-[#1E24323B]"
             >
               <img src={googleIcon} className="px-2" />
               <h1>Sign in with Google</h1>
@@ -38,8 +38,13 @@ export default function Signup() {
               onClick={() => {
                 onKaKaoLoginClick();
               }}
+              className="relative m-1 w-full border-2 rounded-lg p-5 border-[#1E24323B] overflow-hidden"
             >
-              <img src={kakaoIcon} className="px-2" />
+              <img
+                src={kakaoIcon}
+                alt="Kakao Login"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
             </button>
           </div>
         </div>

@@ -6,12 +6,17 @@ import chatIcon from "../../assets/mypage/mychatting.png";
 import commuIcon from "../../assets/mypage/mycommunity.png";
 import settingIcon from "../../assets/mypage/setting.png";
 import logOutIcon from "../../assets/mypage/logout.png";
+import type { UserProfileResponse } from "../../api";
 
 export type SetShowLogoutModal = {
   setShowLogoutModal: (show: boolean) => void;
+  profile: UserProfileResponse | null;
 };
 
-export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
+export default function MyPageNav({
+  setShowLogoutModal,
+  profile,
+}: SetShowLogoutModal) {
   const { category } = useParams<{ category: string }>();
   const slug = (category as CategoryKey) ?? "general";
 
@@ -25,7 +30,7 @@ export default function MyPageNav({ setShowLogoutModal }: SetShowLogoutModal) {
   return (
     <div className="absolute bottom-0  w-full h-4/6 flex flex-col  bg-white rounded-t-xl p-5">
       <div className="space-y-4 flex flex-col ">
-        <h1 className=" text-2xl">Daivid J</h1>
+        <h1 className=" text-2xl">{!profile?.profileName}</h1>
         <h1>+1 555 555 55 55</h1>
         <MyPageButton
           title="Notification"
