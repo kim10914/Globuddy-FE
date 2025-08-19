@@ -45,8 +45,8 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    // withCredentials: true, // 쿠키
   },
+  withCredentials: false, // 쿠키 인증 안 쓰면 false가 안전
 });
 
 /**
@@ -81,16 +81,11 @@ export const retryRequest = async <T>(
   }
 };
 /** 요청 인터셉터 - 매 요청마다 Authorization 자동 첨부 */
-apiClient.interceptors.request.use((config: InternalAxiosRequestConfig & { authRequired?: boolean }) => {
+apiClient.interceptors.request.use((config) => {
   const token = getAccessToken();
-  const needAuth = config.authRequired ?? true; // [추가]
-  if (needAuth && token && config.headers) {
+  if (token && config.headers) {
     config.headers["Authorization"] = `Bearer ${token}`;
-    config.headers["X-AUTH-TOKEN"] = token;
-  } else if (config.headers) {
-    // 명시적으로 인증 해더 제거
-    delete (config.headers as any)["Authorization"];
-    delete (config.headers as any)["X-AUTH-TOKEN"];
+    // delete config.headers["X-AUTH-TOKEN"]; // 가능하면 사용 안 하기
   }
   return config;
 });
