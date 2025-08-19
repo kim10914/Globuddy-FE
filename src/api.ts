@@ -81,14 +81,16 @@ export const retryRequest = async <T>(
   }
 };
 /** 요청 인터셉터 - 매 요청마다 Authorization 자동 첨부 */
-apiClient.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token && config.headers) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-    // delete config.headers["X-AUTH-TOKEN"]; // 가능하면 사용 안 하기
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig & { authRequired?: boolean }) => {
+    const token = getAccessToken();
+    const needAuth = config.authRequired ?? true; // 기본은 true
+    if (needAuth && token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
   }
-  return config;
-});
+);
 
 /**유저 아이디 가져오는 함수- 저장된 유저 ID가 없을 경우 null 반환
  * @returns {string | null} 유저 ID 또는 null
@@ -413,7 +415,7 @@ export async function fetchPopularPostsApi(
   };
 
   const res = await retryRequest(() =>
-    apiClient.get("/posts/all/popular", { params, signal: options?.signal })
+    apiClient.get("/posts/all/popular", { params, signal: options?.signal, authRequired: false, })
   );
 
   if (res.status !== 200) {
