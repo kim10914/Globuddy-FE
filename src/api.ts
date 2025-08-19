@@ -94,8 +94,10 @@ export function getUserId(): string | null {
  * @returns {Promise<GoogleAuthResponse>} 백엔드에서 반환된 응답 데이터
  */
 export async function googleAuthLoginApi(code: string) {
-  const res = await retryRequest(() =>
-    apiClient.post("/member/google/doLogin", { code }) // URL 수정
+  const res = await apiClient.post(
+    "/member/google/doLogin",
+    { code },
+    { withCredentials: false } // 요청만 쿠키 미포함
   );
   return res.data;
 }
