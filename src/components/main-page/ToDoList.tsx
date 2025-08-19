@@ -19,14 +19,14 @@ type ToDoListItemsProps = {
 export const ToDoList = () => {
   // 데모용 리스트
   const todos = [
-    { id: 1, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 2, text: "투두 B", defaultChecked: true },
-    { id: 3, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 4, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 5, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 6, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 7, text: "Commercial Pilot's License - CPL", defaultChecked: false },
-    { id: 8, text: "Commercial Pilot's License - CPL", defaultChecked: false },
+    { id: 1, text: "공식 사이트 접속 → Individual Application", defaultChecked: false },
+    { id: 2, text: "이메일 인증코드 입력", defaultChecked: false },
+    { id: 3, text: "여권·개인·비상연락처 입력", defaultChecked: false },
+    { id: 4, text: "첫 숙소(또는 Transit 정보) & 미국 연락처 입력", defaultChecked: false },
+    { id: 5, text: "자격 질문 전부 확인", defaultChecked: false },
+    { id: 6, text: "자격 질문 전부 확인", defaultChecked: false },
+    { id: 7, text: "결제(21달러) → 제출", defaultChecked: false },
+    { id: 8, text: "신청번호 저장 & 72시간 내 승인 확인", defaultChecked: false },
   ];
 
   // 리스트가 비어있을 경우 NullToDo만 렌더
