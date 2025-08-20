@@ -5,16 +5,6 @@ import { fetchCountryImageApi } from "../api";
 /**메인 페이지 */
 export default function MainPage() {
   const [countryUrl, setCountryUrl] = useState("");
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    setLoggedIn(!!token);
-    setCheckingAuth(false);
-  }, []);
-
-  if (showSplash || checkingAuth) return <LoadingPage />;
 
   useEffect(() => {
     async function loadImage() {
