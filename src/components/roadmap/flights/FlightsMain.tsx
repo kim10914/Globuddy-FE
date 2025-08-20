@@ -56,6 +56,27 @@ export default function FlightsMain() {
     }
   };
 
+  // 카드 선택 처리 핸들러
+  const handleSelectCard = async (slug: string, name: string) => {
+    if (submitting) return;
+    setSubmitting(true);
+    setPickedLocation(name);
+
+    const match = countryMap[name] || Object.values(countryMap).find(m => m.slug === slug);
+    const countryCode = match?.code;
+
+    try {
+      if (countryCode) {
+        await patchRoadmapVisaApi({ country: countryCode });
+      }
+    } catch (e) {
+      console.error("patchRoadmapVisaApi failed:", e);
+    } finally {
+      setSubmitting(false);
+      navigate(`/visa/${slug}`);
+    }
+  };
+
   return (
     <main className="w-full max-w-md mx-auto px-[24px] pt-[60px] flex flex-col gap-[40px]">
       {/* 상단 카피 */}
@@ -74,9 +95,8 @@ export default function FlightsMain() {
       >
         <img src={LocationIcon} alt="location" className="w-5 h-5 opacity-70" />
         <span
-          className={`text-[16px] ${
-            pickedLocation ? "text-gray-900" : "text-[#98A2B3]"
-          }`}
+          className={`text-[16px] ${pickedLocation ? "text-gray-900" : "text-[#98A2B3]"
+            }`}
         >
           {pickedLocation ?? "Where to?"}
         </span>
@@ -84,7 +104,7 @@ export default function FlightsMain() {
 
       {/* 국가 카드 리스트 */}
       <section className="bg-[#F9FAFB] rounded-[6px] py-[10px] px-[16px]">
-        <CountryCardList />
+        <CountryCardList onSelect={handleSelectCard} />
       </section>
 
       {/* 위치 선택 모달 */}

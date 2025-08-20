@@ -202,7 +202,7 @@ export async function createPostApi(
     apiClient.post("/posts/new", body, { signal: options?.signal })
   );
 
-  // 스웨거는 200 OK를 예시로 제시
+  // 200은 성공
   if (res.status !== 200 && res.status !== 201) {
     throw new Error(`Create failed (status: ${res.status})`);
   }

@@ -1,10 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import CategoryHeader from "../../components/community/category/CategoryHeader";
 import { CategoryInfo, type CategoryKey } from "../../types";
 import WriteMain from "../../components/community/write/WriteMain";
 import PostFooter from "../../components/community/Post/PostFooter";
 
 export default function CommunityWrite() {
+    const navigate = useNavigate();
     const { category } = useParams<{ category: string }>();
 
     const categoryKey = category as CategoryKey | undefined;
@@ -15,8 +16,8 @@ export default function CommunityWrite() {
     return (
         <div>
             <CategoryHeader category={title} sticky showWriteButton={false} />
-            <WriteMain/>
-            <PostFooter/>
+            <WriteMain />
+            <PostFooter categoryId={title} country={"KR"} onSuccess={() => navigate(-1)} />
         </div>
     )
 }
