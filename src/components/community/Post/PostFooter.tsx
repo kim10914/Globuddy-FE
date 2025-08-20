@@ -2,13 +2,41 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // 수정: useParams 제거
 import { createPostApi, createReplyApi } from "../../../api";
 import { type CategoryKey } from "../../../types"; // 수정: 올바른 경로로 교체
+import { CATEGORY_ID_MAP } from "../../../components/community/data";
 
 import Smile from '../../../assets/community/스마일.svg'
 import Clip from '../../../assets/community/클립.svg'
 import Export from '../../../assets/community/종이비행기.svg'
-import { CATEGORY_ID_MAP } from "../data";
 
-// 수정: 모드별 props (post에서는 country 제거, 선택값 추가)
+// 문자열 → CategoryKey 안전 변환 유틸
+const toCategoryKey = (v: string): CategoryKey | undefined => {
+    const k = v
+        .trim()
+        .toLowerCase()
+        .replace(/[_\s]+/g, "-"); // space/underscore → 하이픈
+    // 슬러그 축약형도 보정 (선호도에 따라 확장 가능)
+    const alias: Record<string, CategoryKey> = {
+        "campuslife": "campus-life",
+        "worklife": "work-life",
+        "visatips": "visa-tips",
+    };
+    const candidate = (k in CATEGORY_ID_MAP ? k : alias[k]) as
+        | CategoryKey
+        | undefined;
+    return candidate;
+};
+
+const resolveCategoryId = (v: number | string): number | undefined => {
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+    const n = Number(v);
+    if (Number.isInteger(n)) return n;
+    if (typeof v === "string") {
+        const key = toCategoryKey(v); // 문자열 정규화 후 키 판단
+        if (key) return CATEGORY_ID_MAP[key];
+    }
+    return undefined;
+};
+
 type PostModeProps = {
     mode: "post";
     categoryId: number | string;
@@ -24,16 +52,6 @@ type ReplyModeProps = {
     onError?: (err: unknown) => void;
 };
 type PostFooterProps = PostModeProps | ReplyModeProps;
-
-const resolveCategoryId = (v: number | string): number | undefined => { // 수정
-    if (typeof v === "number" && Number.isFinite(v)) return v;            // 수정
-    const n = Number(v);                                                  // 수정
-    if (Number.isInteger(n)) return n;                                    // 수정
-    if (typeof v === "string" && (v as string) in CATEGORY_ID_MAP) {      // 수정
-        return CATEGORY_ID_MAP[v as CategoryKey];                           // 수정
-    }
-    return undefined;                                                     // 수정
-};
 
 export default function PostFooter(props: PostFooterProps) {
     const [text, setText] = useState("");
@@ -92,7 +110,7 @@ export default function PostFooter(props: PostFooterProps) {
             }
         } catch (err) {
             console.error(err);
-            props.onError?.(err);                                            // 수정
+            props.onError?.(err);
         } finally {
             setLoading(false);
         }
