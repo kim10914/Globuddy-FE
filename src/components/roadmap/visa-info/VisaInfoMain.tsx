@@ -12,13 +12,6 @@ const VISA_ID_MAP: Record<string, Record<string, number>> = {
     jpn: { "유학": 8, "문화활동": 9, "특정활동": 10, "기술·인문지식·국제업무": 11, "특정기능": 12 },
     cnd: { "e-TA": 13, "Study Permit": 14, "Work Permit": 15, "Co-op Permit": 16 },
 };
-type VisaBrief = { id: number; visaName: string };
-const COUNTRY_SLUG_TO_CODE: Record<string, string> = {
-    usa: "US",
-    chn: "CN",
-    jpn: "JP",
-    cnd: "CA",
-};
 
 const toSlug = (s: string) =>
     s
