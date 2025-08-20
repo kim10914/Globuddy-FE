@@ -5,6 +5,15 @@ import type { PatchRoadmapByIdResponse, PatchRoadmapVisaResponse } from "../../.
 import NonCheck from '../../../assets/generic/선택.svg'
 import GoHomeModal from "./GoHomeModal";
 
+// 국가 슬러그를 코드로 매핑하는 객체를 추가 (예시)
+const COUNTRY_SLUG_TO_CODE: Record<string, string> = {
+    usa: "US",
+    chn: "CN",
+    jpn: "JP",
+    cnd: "CA",
+    // 필요에 따라 추가
+};
+
 /** 서버가 visaId 직접 제공하지 않으면 사용 */
 const VISA_ID_MAP: Record<string, Record<string, number>> = {
     usa: { ESTA: 1, "F-1": 2, "J-1": 3, "H-1B": 4 },
