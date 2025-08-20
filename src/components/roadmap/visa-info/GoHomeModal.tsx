@@ -38,7 +38,7 @@ export default function GoHomeModal({
         };
     }, [isOpen]);
 
-    // [수정] 홈 이동 전용 핸들러
+    // 홈 이동 전용 핸들러
     const handleGoHome = () => {
         if (onGoHome) onGoHome();
         else navigate("/");

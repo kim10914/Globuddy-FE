@@ -1,17 +1,32 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getRoadmapByIdApi } from "../../../api";
-import type { PatchRoadmapByIdResponse } from "../../../types";
+import { getRoadmapByIdApi, patchRoadmapVisaApi } from "../../../api";
+import type { PatchRoadmapByIdResponse, PatchRoadmapVisaResponse } from "../../../types";
 import NonCheck from '../../../assets/generic/선택.svg'
 import GoHomeModal from "./GoHomeModal";
 
 /** 서버가 visaId 직접 제공하지 않으면 사용 */
 const VISA_ID_MAP: Record<string, Record<string, number>> = {
-    usa: { "ESTA": 1, "F-1": 2, "J-1": 3, "H-1B": 4 },
-    chn: { "L": 5, "Z": 6, "X": 7 },
+    usa: { ESTA: 1, "F-1": 2, "J-1": 3, "H-1B": 4 },
+    chn: { L: 5, Z: 6, X: 7 },
     jpn: { "유학": 8, "문화활동": 9, "특정활동": 10, "기술·인문지식·국제업무": 11, "특정기능": 12 },
     cnd: { "e-TA": 13, "Study Permit": 14, "Work Permit": 15, "Co-op Permit": 16 },
 };
+type VisaBrief = { id: number; visaName: string };
+const COUNTRY_SLUG_TO_CODE: Record<string, string> = {
+    usa: "US",
+    chn: "CN",
+    jpn: "JP",
+    cnd: "CA",
+};
+
+const toSlug = (s: string) =>
+    s
+        .normalize("NFC")
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/(^-|-$)+/g, "");
 
 export default function VisaInfoMain() {
     const [open, setOpen] = useState(false);
@@ -19,8 +34,6 @@ export default function VisaInfoMain() {
     const country = (sp.get("country") ?? "").toLowerCase();
     const visaCode = sp.get("visa") ?? "";
     const visaLabel = (sp.get("label") ?? visaCode) || "Visa";
-
-    const resolvedVisaId = VISA_ID_MAP[country]?.[visaCode];
 
     const [data, setData] = useState<PatchRoadmapByIdResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -66,7 +79,7 @@ export default function VisaInfoMain() {
         const load = async () => {
             setLoading(true);
 
-            // [수정] 필수 파라미터/매핑 누락이면 에러 표시
+            // 필수 파라미터 체크
             if (!country || !visaCode) {
                 if (alive) {
                     setErr("country 또는 visa 파라미터가 없습니다.");
@@ -75,25 +88,65 @@ export default function VisaInfoMain() {
                 }
                 return;
             }
-            if (!resolvedVisaId) {
-                if (alive) {
-                    setErr("해당 비자 정보를 찾을 수 없습니다.");
-                    setData(null);
-                    setLoading(false);
-                }
-                return;
-            }
 
             try {
-                const res = await getRoadmapByIdApi(resolvedVisaId, { signal: controller.signal });
+                // 1) fallback: 하드코딩 매핑에서 시도 (대소문자/슬러그 보정) 
+                let visaId: number | undefined = VISA_ID_MAP[country]?.[visaCode] ?? VISA_ID_MAP[country]?.[visaCode.toUpperCase()] ??
+                    undefined;
+
+                // 2) 서버에서 최신 비자 목록을 받아서 매칭
+                if (!visaId) {
+                    const countryCode = COUNTRY_SLUG_TO_CODE[country];
+                    if (!countryCode) {
+                        if (alive) {
+                            setErr("지원하지 않는 국가입니다.");
+                            setData(null);
+                            setLoading(false);
+                        }
+                        return;
+                    }
+
+                    const raw: PatchRoadmapVisaResponse = await patchRoadmapVisaApi(         // 수정
+                        { country: countryCode },
+                        { signal: controller.signal }
+                    );
+
+                    let list: VisaBrief[] = [];                                              // 수정
+                    if (Array.isArray(raw)) {                                                // 수정
+                        list = raw as unknown as VisaBrief[];                                  // 수정
+                    } else if (Array.isArray((raw as any)?.items)) {                         // 수정
+                        list = (raw as any).items as VisaBrief[];                              // 수정
+                    } else if (Array.isArray((raw as any)?.visas)) {                         // 수정
+                        list = (raw as any).visas as VisaBrief[];                              // 수정
+                    }                                                                         // 수정
+
+                    const wanted = toSlug(visaCode);                                         // 그대로
+                    const found = list.find(
+                        v => toSlug(v.visaName) === wanted || v.visaName === visaCode
+                    );                                                                        // 그대로
+                    visaId = found?.id;
+                }
+
+                if (!visaId) {
+                    if (alive) {
+                        setErr("해당 비자 정보를 찾을 수 없습니다.");
+                        setData(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                // 3) 최종 id로 로드  // 수정
+                const res = await getRoadmapByIdApi(visaId, { signal: controller.signal });
                 if (!alive) return;
                 setData(res);
                 setErr(null);
             } catch (e) {
                 console.error("[VisaInfoMain] fetch failed:", e);
-                if (!alive) return;
-                setData(null);
-                setErr("비자 정보를 불러오지 못했습니다.");
+                if (alive) {
+                    setData(null);
+                    setErr("비자 정보를 불러오지 못했습니다.");
+                }
             } finally {
                 if (alive) setLoading(false);
             }
@@ -104,12 +157,11 @@ export default function VisaInfoMain() {
             alive = false;
             controller.abort();
         };
-    }, [country, visaCode, resolvedVisaId]);
+    }, [country, visaCode]); // 수정: resolvedVisaId 의존성 제거
 
     const checklist = useMemo(() => {
         if (!data) return [];
         const flat = data.section2.flatMap((s) => s.content);
-        // 중복 제거
         return Array.from(new Set(flat));
     }, [data]);
 

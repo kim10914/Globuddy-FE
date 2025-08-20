@@ -43,7 +43,7 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
             if (props.mode === "post") { // 수정: 새 글 작성 분기
                 const { categoryId, country = null, onSuccess, } = props;
                 if (typeof categoryId !== "number" || !country?.trim()) {
-                    console.warn("categoryId/country가 없습니다."); // 수정: 가드
+                    console.warn("categoryId/country가 없습니다.");
                     return;
                 }
                 await createPostApi(
