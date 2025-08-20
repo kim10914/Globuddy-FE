@@ -4,12 +4,15 @@ import Ch from '../../../assets/roadmap/중국.svg'
 import Jp from '../../../assets/roadmap/일본.svg'
 import CA from '../../../assets/roadmap/캐나다.svg'
 
-export default function CountryCardList() {
+type CountryCardListProps = {
+    onSelect?: (slug: string, name: string) => void;
+};
+export default function CountryCardList({ onSelect }: CountryCardListProps) {
     const countries = [
-        { country: Us, countryName: "United States of America" },
-        { country: Ch, countryName: "China" },
-        { country: Jp, countryName: "Japan" },
-        { country: CA, countryName: "Canada" },
+        { country: Us, countryName: "United States of America", slug: "usa" },
+        { country: Ch, countryName: "China", slug: "chn" },
+        { country: Jp, countryName: "Japan", slug: "jpn" },
+        { country: CA, countryName: "Canada", slug: "cnd" },
     ];
     return (
         <div className="flex flex-col gap-[12px]">
@@ -18,6 +21,8 @@ export default function CountryCardList() {
                     key={index}
                     country={c.country}
                     countryName={c.countryName}
+                    slug={c.slug}
+                    onSelect={onSelect}
                 />
             ))}
         </div>
