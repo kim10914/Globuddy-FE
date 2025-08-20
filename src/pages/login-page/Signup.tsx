@@ -11,13 +11,15 @@ import { useEffect } from "react";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("accessToken");
-
+  function isLoggedIn() {
+    const token = localStorage.getItem("accessToken");
+    return !!token;
+  }
   useEffect(() => {
-    if (token) {
+    if (isLoggedIn()) {
       navigate("/", { replace: true });
     }
-  }, [token, navigate]);
+  }, [navigate]);
 
   return (
     <>
