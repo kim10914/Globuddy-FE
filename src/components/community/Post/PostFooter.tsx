@@ -1,58 +1,83 @@
-import { useEffect, useRef, useState } from "react";
-import { createPostApi } from "../../../api";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";                // 수정: 새글 작성 성공 시 이전 페이지 이동
+import { createPostApi, createReplyApi } from "../../../api";  // 수정: 두 API 동시 사용
 
 import Smile from '../../../assets/community/스마일.svg'
 import Clip from '../../../assets/community/클립.svg'
 import Export from '../../../assets/community/종이비행기.svg'
 
-type PostFooterProps = {
-    categoryId: string | number; // 카테고리 ID
-    country: string;
+// 수정: 모드별 props (discriminated union)
+type PostModeProps = {
+    mode: "post";                 // 수정
+    categoryId: number | string;           // 수정: createPostApi 필수
+    country: string;              // 수정: createPostApi 필수
     onSuccess?: () => void;
     onError?: (err: unknown) => void;
 };
-/**
- * 댓글 입력 컴포넌트
- * - 입력 없을 땐 '클립', 입력 있으면 '종이비행기' 아이콘
- * - Enter 전송 / 아이콘 클릭 전송 또는 첨부
- * - 입력 중 배경색을 회색→흰색으로 전환
- */
-export default function PostFooter({ categoryId, country, onSuccess, onError }: PostFooterProps) {
-    const [text, setText] = useState(""); // 텍스트
-    const [loading, setLoading] = useState(false);
-    const abortRef = useRef<AbortController | null>(null);
-    const hasText = text.trim().length > 0; // 텍스트 수 확인
+type ReplyModeProps = {
+    mode: "reply";                // 수정
+    postId: number | string;      // 수정: createReplyApi 대상 게시글
+    onSuccess?: () => void;
+    onError?: (err: unknown) => void;
+};
+type PostFooterProps = PostModeProps | ReplyModeProps; // 수정
+
+export default function PostFooter(props: PostFooterProps) {   // 수정
+    const [text, setText] = useState("");
+    const [loading, setLoading] = useState(false);               // 수정: 중복 전송 방지
+    const abortRef = useRef<AbortController | null>(null);       // 수정: 요청 취소
+    const navigate = useNavigate();                              // 수정
+
+    const hasText = text.trim().length > 0;
+
     /** 전송 핸들러 */
     const handleSend = async () => {
-        if (!hasText || loading) return; // 수정: 중복/공백 방지
-        if (typeof categoryId !== "number" || !country?.trim()) {
-            console.warn("categoryId/country가 없습니다."); // 수정: 가드
-            return;
-        }
+        if (!hasText || loading) return;
 
         try {
-            setLoading(true); // 수정: 로딩 시작
-            abortRef.current?.abort(); // 수정: 기존 요청 취소
-            const ac = new AbortController(); // 수정
-            abortRef.current = ac; // 수정
+            setLoading(true);
+            abortRef.current?.abort();
+            const ac = new AbortController();
+            abortRef.current = ac;
 
-            // 수정: 글 작성 API 호출 (필수 필드만)
-            await createPostApi(
-                {
-                    content: text.trim(), categoryId, country: country.trim(),
-                    isAnonymous: false
-                },
-                { signal: ac.signal }
-            );
-
-            setText(""); // 전송 후 리셋
-            onSuccess?.(); // 상위 후처리 (예: navigate(-1))
+            if (props.mode === "post") { // 수정: 새 글 작성 분기
+                const { categoryId, country, onSuccess, onError } = props;
+                if (typeof categoryId !== "number" || !country?.trim()) {
+                    console.warn("categoryId/country가 없습니다."); // 수정: 가드
+                    return;
+                }
+                await createPostApi(
+                    {
+                        content: text.trim(), categoryId, country: country.trim(),
+                        isAnonymous: false
+                    },
+                    { signal: ac.signal }
+                );
+                setText("");
+                onSuccess?.();
+                navigate(-1); // 수정: 새 글 작성 성공 시 이전 페이지(게시판)로 이동
+            } else {                 // props.mode === "reply"  // 수정: 댓글 작성 분기
+                const { postId, onSuccess, onError } = props;
+                if (postId === undefined || postId === null || postId === "") {
+                    console.warn("postId가 없습니다."); // 수정: 가드
+                    return;
+                }
+                await createReplyApi(
+                    postId,
+                    {
+                        content: text.trim(),
+                        isAnonymous: false
+                    },
+                    { signal: ac.signal }
+                );
+                setText("");
+                onSuccess?.(); // 댓글은 페이지 이동 없음(현재 화면 유지)
+            }
         } catch (err) {
             console.error(err);
-            onError?.(err); // 상위 에러 처리 위임
-            // 필요 시 사용자 피드백(UI는 요청 없으므로 alert 생략)
+            props.onError?.(err); // 수정: 상위로 에러 전달
         } finally {
-            setLoading(false); // 로딩 종료
+            setLoading(false);
         }
     };
 
@@ -64,10 +89,10 @@ export default function PostFooter({ categoryId, country, onSuccess, onError }: 
         }
     };
 
-    /** 언마운트 시 취소 */
     useEffect(() => {
-        return () => abortRef.current?.abort();
+        return () => abortRef.current?.abort(); // 수정: 언마운트 시 요청 취소
     }, []);
+
     return (
         <div className='px-[12px] pb-[40px] pt-[10px] w-full absolute bottom-0 left-0'>
             <div className=" relative ">
@@ -90,7 +115,7 @@ export default function PostFooter({ categoryId, country, onSuccess, onError }: 
                 <button
                     type="button"
                     onClick={handleSend}
-                    disabled={!hasText} // 입력값 없으면 버튼 비활
+                    disabled={!hasText || loading} // 수정
                     className="absolute right-[20px] top-1/2 -translate-y-1/2 h-[20px] w-[20px] opacity-100 disabled:opacity-40"
                 >
                     <img src={hasText ? Export : Clip} alt="전송" />
