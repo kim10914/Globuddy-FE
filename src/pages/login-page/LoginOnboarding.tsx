@@ -7,12 +7,6 @@ import LocationModal from "../../components/roadmap/flights/LocationModal";
 import { patchRoadmapVisaApi } from "../../api";
 import { useNavigate } from "react-router-dom";
 
-const toSlug = (name: string) =>
-  name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-");
-
 const countryMap: Record<string, { code: string; slug: string }> = {
   "United States of America": { code: "US", slug: "usa" },
   USA: { code: "US", slug: "usa" },
@@ -44,7 +38,6 @@ export default function LoginOnboarding() {
     // 매핑에서 코드/슬러그 찾기 (없으면 안전한 fallback)
     const match = countryMap[item.name];
     const countryCode = match?.code;
-    const countrySlug = match?.slug ?? toSlug(item.name);
 
     try {
       if (countryCode) {
@@ -55,7 +48,7 @@ export default function LoginOnboarding() {
       console.error("patchRoadmapVisaApi failed:", e);
     } finally {
       setSubmitting(false);
-      navigate(`/visa/${countrySlug}`);
+      navigate("/");
     }
   };
 

@@ -6,8 +6,21 @@ import kakaoIcon from "../../assets/login-page/카카오 로그인 버튼.svg";
 import pathportIcom from "../../assets/generic/패스포트아이콘.svg";
 import Pathport from "../../assets/login-page/Pathport.svg";
 import { onKaKaoLoginClick } from "../../utils/kakao-login/kakaoAuthUtil";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Signup() {
+  const navigate = useNavigate();
+  function isLoggedIn() {
+    const token = localStorage.getItem("accessToken");
+    return !!token;
+  }
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
   return (
     <>
       <div className="flex items-center justify-center h-screen">
