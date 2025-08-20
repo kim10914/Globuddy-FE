@@ -7,10 +7,10 @@ import GoHomeModal from "./GoHomeModal";
 
 /** 서버가 visaId 직접 제공하지 않으면 사용 */
 const VISA_ID_MAP: Record<string, Record<string, number>> = {
-    usa: { "ESTA": 101, "F-1": 102, "J-1": 103, "H-1B": 104 },
-    chn: { "L": 201, "Z": 202, "X": 203 },
-    jpn: { "유학": 301, "문화활동": 302, "특정활동": 303, "기술·인문지식·국제업무": 304, "특정기능": 305 },
-    cnd: { "e-TA": 401, "Study Permit": 402, "Work Permit": 403, "Co-op Permit": 404 },
+    usa: { "ESTA": 1, "F-1": 2, "J-1": 3, "H-1B": 4 },
+    chn: { "L": 5, "Z": 6, "X": 7 },
+    jpn: { "유학": 8, "문화활동": 9, "특정활동": 10, "기술·인문지식·국제업무": 11, "특정기능": 12 },
+    cnd: { "e-TA": 13, "Study Permit": 14, "Work Permit": 15, "Co-op Permit": 16 },
 };
 
 export default function VisaInfoMain() {
@@ -105,7 +105,7 @@ export default function VisaInfoMain() {
             controller.abort();
         };
     }, [country, visaCode, resolvedVisaId]);
-    
+
     const checklist = useMemo(() => {
         if (!data) return [];
         const flat = data.section2.flatMap((s) => s.content);
