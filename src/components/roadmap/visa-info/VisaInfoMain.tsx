@@ -38,6 +38,7 @@ export default function VisaInfoMain() {
     const [data, setData] = useState<PatchRoadmapByIdResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState<string | null>(null);
+    const labelParam = sp.get("label") ?? "";
 
     // 문자열 내 URL을 자동 링크로 바꾸어 렌더링
     const renderWithLinks = (text: string) => {
@@ -79,7 +80,6 @@ export default function VisaInfoMain() {
         const load = async () => {
             setLoading(true);
 
-            // 필수 파라미터 체크
             if (!country || !visaCode) {
                 if (alive) {
                     setErr("country 또는 visa 파라미터가 없습니다.");
@@ -90,12 +90,26 @@ export default function VisaInfoMain() {
             }
 
             try {
-                // 1) fallback: 하드코딩 매핑에서 시도 (대소문자/슬러그 보정) 
-                let visaId: number | undefined = VISA_ID_MAP[country]?.[visaCode] ?? VISA_ID_MAP[country]?.[visaCode.toUpperCase()] ??
-                    undefined;
+                // 0) visa가 숫자면 ID로 직접 사용
+                let visaId: number | undefined = undefined;
+                const numericId = Number(visaCode);
+                if (Number.isInteger(numericId) && numericId > 0) {
+                    visaId = numericId;
+                }
 
-                // 2) 서버에서 최신 비자 목록을 받아서 매칭
+
+                // 1) 숫자가 아니면 라벨(or visa 문자열)로 매핑 시도
+                //    - labelParam이 있으면 우선 사용
                 if (!visaId) {
+                    const keyForName = (labelParam || visaCode);
+                    visaId =
+                        VISA_ID_MAP[country]?.[keyForName] ??
+                        VISA_ID_MAP[country]?.[keyForName.toUpperCase()] ??
+                        undefined;
+                }
+
+                // 2) 그래도 못 찾으면 서버 목록에서 
+                if (!visaId) {                                     // 수정
                     const countryCode = COUNTRY_SLUG_TO_CODE[country];
                     if (!countryCode) {
                         if (alive) {
@@ -106,28 +120,31 @@ export default function VisaInfoMain() {
                         return;
                     }
 
-                    const raw: PatchRoadmapVisaResponse = await patchRoadmapVisaApi(         // 수정
+                    const raw: PatchRoadmapVisaResponse = await patchRoadmapVisaApi(
                         { country: countryCode },
                         { signal: controller.signal }
                     );
 
-                    let list: VisaBrief[] = [];                                              // 수정
-                    if (Array.isArray(raw)) {                                                // 수정
-                        list = raw as unknown as VisaBrief[];                                  // 수정
-                    } else if (Array.isArray((raw as any)?.items)) {                         // 수정
-                        list = (raw as any).items as VisaBrief[];                              // 수정
-                    } else if (Array.isArray((raw as any)?.visas)) {                         // 수정
-                        list = (raw as any).visas as VisaBrief[];                              // 수정
-                    }                                                                         // 수정
+                    type VisaBrief = { id: number; visaName: string };
+                    let list: VisaBrief[] = [];
+                    if (Array.isArray(raw)) {
+                        list = raw as unknown as VisaBrief[];
+                    } else if (Array.isArray((raw as any)?.items)) {
+                        list = (raw as any).items as VisaBrief[];
+                    } else if (Array.isArray((raw as any)?.visas)) {
+                        list = (raw as any).visas as VisaBrief[];
+                    }
 
-                    const wanted = toSlug(visaCode);                                         // 그대로
+                    const keyForName = (labelParam || visaCode);     // 서버 매칭에도 동일 키 사용
+                    const wanted = toSlug(keyForName);
                     const found = list.find(
-                        v => toSlug(v.visaName) === wanted || v.visaName === visaCode
-                    );                                                                        // 그대로
+                        (v) => toSlug(v.visaName) === wanted || v.visaName === keyForName
+                    );
                     visaId = found?.id;
                 }
 
-                if (!visaId) {
+                // 최종 가드
+                if (typeof visaId !== "number") {
                     if (alive) {
                         setErr("해당 비자 정보를 찾을 수 없습니다.");
                         setData(null);
@@ -136,7 +153,7 @@ export default function VisaInfoMain() {
                     return;
                 }
 
-                // 3) 최종 id로 로드  // 수정
+                // 3) 상세 조회
                 const res = await getRoadmapByIdApi(visaId, { signal: controller.signal });
                 if (!alive) return;
                 setData(res);
@@ -157,7 +174,7 @@ export default function VisaInfoMain() {
             alive = false;
             controller.abort();
         };
-    }, [country, visaCode]); // 수정: resolvedVisaId 의존성 제거
+    }, [country, visaCode, labelParam]);
 
     const checklist = useMemo(() => {
         if (!data) return [];
