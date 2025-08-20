@@ -75,6 +75,7 @@ export default function LoginOnboarding() {
     } finally {
       setSubmitting(false);
       navigate("/");
+      window.location.reload();
     }
   };
 
