@@ -7,13 +7,17 @@ import pathportIcom from "../../assets/generic/패스포트아이콘.svg";
 import Pathport from "../../assets/login-page/Pathport.svg";
 import { onKaKaoLoginClick } from "../../utils/kakao-login/kakaoAuthUtil";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
-  const nav = useNavigate();
-  if (token) {
-    nav("/");
-  } else nav("/login");
+
+  useEffect(() => {
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [token, navigate]);
 
   return (
     <>
