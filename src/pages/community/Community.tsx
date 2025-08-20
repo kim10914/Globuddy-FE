@@ -6,7 +6,7 @@ export default function Community() {
         <div>
             <header className="text-[20px] text-[#1D2939] font-medium my-[25px] pl-[25px] ">
                 {/* 국가는 변수로 받기 */}
-                <p>Korea</p>
+                <p>Community</p>
             </header>
             <div className="overflow-visible">
                 <CommunityMain />

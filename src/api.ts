@@ -193,20 +193,24 @@ export async function createPostApi(
   body: CreatePostRequest,
   options?: { signal?: AbortSignal }
 ): Promise<PostDetail> {
-  // 필수값 간단 가드 (재사용 가능)
-  if (!body?.content || typeof body.categoryId !== "number" || !body.country) {
-    throw new Error("content, categoryId, country는 필수입니다.");
+  // 필수값 가드
+  if (!body?.content || typeof body.categoryId !== "number") { 
+    throw new Error("content, categoryId는 필수입니다."); 
   }
 
+  // 서버로는 country를 항상 null로 보냄
+  const payload = {
+    ...body,
+    country: null,
+  };
+
   const res = await retryRequest(() =>
-    apiClient.post("/posts/new", body, { signal: options?.signal })
+    apiClient.post("/posts/new", payload, { signal: options?.signal }) // 수정: payload 사용
   );
 
-  // 200은 성공
   if (res.status !== 200 && res.status !== 201) {
     throw new Error(`Create failed (status: ${res.status})`);
   }
-
   return normalizePost(res.data);
 }
 //  /posts/all : 전체 게시글 조회(검색/정렬용)

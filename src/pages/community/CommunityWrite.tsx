@@ -17,7 +17,7 @@ export default function CommunityWrite() {
         <div>
             <CategoryHeader category={title} sticky showWriteButton={false} />
             <WriteMain />
-            <PostFooter mode="post" categoryId={title} country={"KR"} onSuccess={() => navigate(-1)} />
+            <PostFooter mode="post" categoryId={title} onSuccess={() => navigate(-1)} />
         </div>
     )
 }
