@@ -47,7 +47,7 @@ function App() {
       <Route path="/loading" element={<LoadingPage />} />
       <Route
         path="/login"
-        element={isLoggedIn() ? <Navigate to="/" replace /> : <Signup />}
+        element={isLoggedIn() ? <Signup /> : <Navigate to="/" replace />}
       />
       <Route path="/login/onboarding" element={<LoginOnboarding />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
