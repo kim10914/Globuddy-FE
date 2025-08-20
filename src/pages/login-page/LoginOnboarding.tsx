@@ -15,6 +15,8 @@ const countryMap: Record<string, { code: string; slug: string }> = {
   Canada: { code: "CA", slug: "cnd" },
 };
 
+type PickItem = { name: string; hashtags: string[] };
+
 export default function LoginOnboarding() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,11 +26,35 @@ export default function LoginOnboarding() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // 국가 선택 시 서버에 country 설정(PATCH) 후 /visa/:countrySlug 로 이동
-  const handleSelectLocation = async (item: {
-    name: string;
-    hashtags: string[];
-  }) => {
+  // // 국가 선택 시 서버에 country 설정(PATCH) 후 /visa/:countrySlug 로 이동
+  // const handleSelectLocation = async (item: {
+  //   name: string;
+  //   hashtags: string[];
+  // }) => {
+  //   if (submitting) return;
+  //   setSubmitting(true);
+
+  //   setPickedLocation(item.name);
+  //   closeModal();
+
+  //   // 매핑에서 코드/슬러그 찾기 (없으면 안전한 fallback)
+  //   const match = countryMap[item.name];
+  //   const countryCode = match?.code;
+
+  //   try {
+  //     if (countryCode) {
+  //       await patchRoadmapVisaApi({ country: countryCode });
+  //     }
+  //   } catch (e) {
+  //     // 서버 설정 실패해도 라우팅은 진행
+  //     console.error("patchRoadmapVisaApi failed:", e);
+  //   } finally {
+  //     setSubmitting(false);
+  //     navigate("/", { replace: true });
+  //   }
+  // };
+
+  const handleSelectLocation = async (item: PickItem) => {
     if (submitting) return;
     setSubmitting(true);
 
@@ -48,7 +74,7 @@ export default function LoginOnboarding() {
       console.error("patchRoadmapVisaApi failed:", e);
     } finally {
       setSubmitting(false);
-      navigate("/", { replace: true });
+      navigate("/");
     }
   };
 
@@ -79,9 +105,8 @@ export default function LoginOnboarding() {
               className="w-5 h-5 opacity-70"
             />
             <span
-              className={`text-[16px] ${
-                pickedLocation ? "text-gray-900" : "text-[#98A2B3]"
-              }`}
+              className={`text-[16px] ${pickedLocation ? "text-gray-900" : "text-[#98A2B3]"
+                }`}
             >
               {pickedLocation ?? "Where do you want to go?"}
             </span>
@@ -100,3 +125,4 @@ export default function LoginOnboarding() {
     </div>
   );
 }
+
