@@ -16,6 +16,7 @@ import RoadmapFlights from "./pages/roadmap/RoadmapFlights";
 import VisaSearch from "./pages/roadmap/VisaSearch";
 import VisaInfo from "./pages/roadmap/VisaInfo";
 import { useEffect, useState } from "react";
+import RedirectIfAuth from "./pages/RedirectIfAuth";
 
 function App() {
   function isLoggedIn() {
@@ -45,7 +46,14 @@ function App() {
         element={isLoggedIn() ? <MainPage /> : <Navigate to="/login" replace />}
       />
       <Route path="/loading" element={<LoadingPage />} />
-      <Route path="/login" element={<Signup />} />
+      <Route
+        path="/login"
+        element={
+          <RedirectIfAuth>
+            <Signup />
+          </RedirectIfAuth>
+        }
+      />
       <Route path="/login/onboarding" element={<LoginOnboarding />} />
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
       <Route path="/oauth/kakao/redirect" element={<AuthCallbackPage />} />

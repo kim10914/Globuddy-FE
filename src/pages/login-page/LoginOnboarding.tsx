@@ -48,7 +48,7 @@ export default function LoginOnboarding() {
       console.error("patchRoadmapVisaApi failed:", e);
     } finally {
       setSubmitting(false);
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 
