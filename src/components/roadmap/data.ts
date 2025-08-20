@@ -8,28 +8,28 @@ export type VisaItem = {
 
 export const visaPresets: Record<CountrySlug, VisaItem[]> = {
     usa: [
-        { id: "ESTA", label: "ESTA" },
-        { id: "F-1", label: "F-1" },
-        { id: "J-1", label: "J-1" },
-        { id: "H-1B", label: "H-1B" },
+        { id: 1, label: "ESTA" },
+        { id: 2, label: "F-1" },
+        { id: 3, label: "J-1" },
+        { id: 4, label: "H-1B" },
     ],
     chn: [
-        { id: "L", label: "L" },
-        { id: "Z", label: "Z" },
-        { id: "X", label: "X" },
+        { id: 5, label: "L" },
+        { id: 6, label: "Z" },
+        { id: 7, label: "X" },
     ],
     jpn: [
-        { id: "유학", label: "유학" },
-        { id: "문화활동", label: "문화활동" },
-        { id: "특정활동", label: "특정활동" },
-        { id: "기술·인문지식·국제업무", label: "기술·인문지식·국제업무" },
-        { id: "특정기능", label: "특정기능" },
+        { id: 8, label: "유학" },
+        { id: 9, label: "문화활동" },
+        { id: 10 , label: "특정활동" },
+        { id: 11, label: "기술·인문지식·국제업무" },
+        { id: 12, label: "특정기능" },
     ],
     cnd: [
-        { id: "e-TA", label: "e-TA" },
-        { id: "Study Permit", label: "Study Permit" },
-        { id: "Work Permit", label: "Work Permit" },
-        { id: "Co-op Permit", label: "Co-op Permit" },
+        { id: 13, label: "e-TA" },
+        { id: 14, label: "Study Permit" },
+        { id: 15, label: "Work Permit" },
+        { id: 16, label: "Co-op Permit" },
     ],
 };
 
