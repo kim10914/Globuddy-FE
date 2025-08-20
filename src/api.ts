@@ -31,7 +31,12 @@ export function getAccessToken(): string | null {
 type PopularPostsQuery = PageableQuery & {
   minCount?: number; // 좋아요 최소 값
 };
-
+/** 좋아요 타입 */
+export type TogglePostLikeResult = {
+  postId: number;
+  countLike: number;
+  isUserPressLike: boolean;
+};
 /** 댓글 생성 바디 타입 */
 export interface CreateReplyRequest {
   content: string;
@@ -458,23 +463,39 @@ export async function fetchPopularPostsApi(
 
 /** 좋아요 토글
  * POST /posts/{id}/likes
- * - 200 OK, 바디 없음
+ * - 200 OK, 바디 있음
  */
 export async function togglePostLikeApi(
   id: number | string,
   options?: { signal?: AbortSignal }
-): Promise<void> {
-  if (id === undefined || id === null || id === "") {
-    throw new Error("id는 필수입니다."); // [추가]
+): Promise<TogglePostLikeResult> {
+  // 수정: path param 정규화 및 가드
+  const postId = typeof id === "number" ? id : Number(id);
+  if (!Number.isInteger(postId) || postId <= 0) {
+    throw new Error("유효한 id가 아닙니다.");
   }
-  const res = await retryRequest(
-    () =>
-      apiClient.post(`/posts/${id}/likes`, null, { signal: options?.signal }) // [추가]
+
+  const res = await retryRequest(() =>
+    apiClient.post(`/posts/${postId}/likes`, undefined, {
+      signal: options?.signal,
+    })
   );
+
   if (res.status !== 200) {
-    throw new Error(`Toggle like failed (status: ${res.status})`); // [추가]
+    throw new Error(`Toggle like failed (status: ${res.status})`);
   }
-  return; // [추가]
+
+  const raw = res.data ?? {};
+  const normalized: TogglePostLikeResult = {
+    postId: Number(raw.postId ?? postId),
+    countLike: Number(raw.countLike ?? raw.likeCount ?? 0),
+    isUserPressLike:
+      typeof raw.isUserPressLike === "boolean"
+        ? raw.isUserPressLike
+        : String(raw.isUserPressLike).toLowerCase() === "true",
+  };
+
+  return normalized;
 }
 
 /** 댓글 생성

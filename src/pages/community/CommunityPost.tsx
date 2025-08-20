@@ -29,6 +29,9 @@ export default function CommunityPost() {
     const [replies, setReplies] = useState<ReplyItem[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(true);
     const [replyError, setReplyError] = useState<string | null>(null);
+
+    const [refreshKey, setRefreshKey] = useState(0);
+
     useEffect(() => {
         if (seedPost) return;
         if (!postId) return;
@@ -98,7 +101,7 @@ export default function CommunityPost() {
             cancelled = true;
             controller.abort();
         };
-    }, [postId]);
+    }, [postId, refreshKey]);
 
     // 카드에 맞게 UI 모델로 매핑
     const cardProps = useMemo(() => {
@@ -147,7 +150,7 @@ export default function CommunityPost() {
                         />
                     ))}
             </div>
-            <PostFooter mode="reply" postId={post.id} />
+            <PostFooter mode="reply" postId={post.id} onSuccess={() => setRefreshKey((k) => k + 1)} />
         </div>
     )
 }

@@ -34,12 +34,19 @@ export const CommunityPostCard = ({ id, avatar, nickname, createdAt, content, li
     const handleToggleLike: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
         e.stopPropagation();
         if (liking) return;
+
         const prev = likeState;
         const next = { isLiked: !prev.isLiked, count: prev.count + (prev.isLiked ? -1 : 1) };
+
         setLikeState(next);
         setLiking(true);
+
         try {
-            await togglePostLikeApi(id);
+            const result = await togglePostLikeApi(id);
+            setLikeState({
+                isLiked: result.isUserPressLike,
+                count: result.countLike,
+            });
         } catch (err) {
             setLikeState(prev);
             console.error('toggle like failed:', err);
