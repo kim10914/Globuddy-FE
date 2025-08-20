@@ -202,6 +202,7 @@ export async function createPostApi(
   const payload = {
     ...body,
     country: null,
+    hashtag : null,
   };
 
   const res = await retryRequest(() =>

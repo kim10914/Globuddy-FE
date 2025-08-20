@@ -107,9 +107,9 @@ export interface MinePostsResponse {
 export interface CreatePostRequest {
     content: string;
     categoryId: number;
-    country: string;
+    country: null | string;
     isAnonymous: boolean;
-    hashtag?: string;
+    hashtag?: null;
 }
 
 /** 게시글 상세 응답 */

@@ -66,7 +66,6 @@ export default function PostFooter(props: PostFooterProps) {
                         categoryId: cid,
                         country: "",                        // 수정: 타입을 위해 string 사용
                         isAnonymous: props.isAnonymous ?? false,
-                        hashtag: props.hashtag ?? undefined // 수정: string | undefined 준수
                     },
                     { signal: ac.signal }
                 );
