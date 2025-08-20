@@ -45,7 +45,13 @@ export function toUiPost(raw: {
         comments: raw.replyCount,
     };
 }
-
+export type CreatePostRequest = {
+  content: string;
+  categoryId: number;
+  country: string | null;
+  isAnonymous?: boolean;
+  hashtag?: string | null;
+};
 // 인기글 가져오기 유틸
 export async function getPopularPosts(
     limit = 4,

@@ -1,32 +1,45 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";                // 수정: 새글 작성 성공 시 이전 페이지 이동
-import { createPostApi, createReplyApi } from "../../../api";  // 수정: 두 API 동시 사용
+import { useNavigate } from "react-router-dom"; // 수정: useParams 제거
+import { createPostApi, createReplyApi } from "../../../api";
+import { type CategoryKey } from "../../../types"; // 수정: 올바른 경로로 교체
 
 import Smile from '../../../assets/community/스마일.svg'
 import Clip from '../../../assets/community/클립.svg'
 import Export from '../../../assets/community/종이비행기.svg'
+import { CATEGORY_ID_MAP } from "../data";
 
-// 수정: 모드별 props (discriminated union)
+// 수정: 모드별 props (post에서는 country 제거, 선택값 추가)
 type PostModeProps = {
-    mode: "post";                 // 수정
-    categoryId: number | string;           // 수정: createPostApi 필수
-    country: string;              // 수정: createPostApi 필수
+    mode: "post";
+    categoryId: number | string;
+    isAnonymous?: boolean;
+    hashtag?: string | null;
     onSuccess?: () => void;
     onError?: (err: unknown) => void;
 };
 type ReplyModeProps = {
-    mode: "reply";                // 수정
-    postId: number | string;      // 수정: createReplyApi 대상 게시글
+    mode: "reply";
+    postId: number | string;
     onSuccess?: () => void;
     onError?: (err: unknown) => void;
 };
-type PostFooterProps = PostModeProps | ReplyModeProps; // 수정
+type PostFooterProps = PostModeProps | ReplyModeProps;
 
-export default function PostFooter(props: PostFooterProps) {   // 수정
+const resolveCategoryId = (v: number | string): number | undefined => { // 수정
+    if (typeof v === "number" && Number.isFinite(v)) return v;            // 수정
+    const n = Number(v);                                                  // 수정
+    if (Number.isInteger(n)) return n;                                    // 수정
+    if (typeof v === "string" && (v as string) in CATEGORY_ID_MAP) {      // 수정
+        return CATEGORY_ID_MAP[v as CategoryKey];                           // 수정
+    }
+    return undefined;                                                     // 수정
+};
+
+export default function PostFooter(props: PostFooterProps) {
     const [text, setText] = useState("");
-    const [loading, setLoading] = useState(false);               // 수정: 중복 전송 방지
-    const abortRef = useRef<AbortController | null>(null);       // 수정: 요청 취소
-    const navigate = useNavigate();                              // 수정
+    const [loading, setLoading] = useState(false);
+    const abortRef = useRef<AbortController | null>(null);
+    const navigate = useNavigate();
 
     const hasText = text.trim().length > 0;
 
@@ -40,26 +53,30 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
             const ac = new AbortController();
             abortRef.current = ac;
 
-            if (props.mode === "post") { // 수정: 새 글 작성 분기
-                const { categoryId, country = null, onSuccess, } = props;
-                if (typeof categoryId !== "number" || !country?.trim()) {
-                    console.warn("categoryId/country가 없습니다.");
+            if (props.mode === "post") {
+                const cid = resolveCategoryId(props.categoryId);
+                if (typeof cid !== "number") {
+                    alert("유효한 카테고리가 없습니다.");
                     return;
                 }
+
                 await createPostApi(
                     {
-                        content: text.trim(), categoryId, country: country.trim(),
-                        isAnonymous: false
+                        content: text.trim(),
+                        categoryId: cid,
+                        country: "",                        // 수정: 타입을 위해 string 사용
+                        isAnonymous: props.isAnonymous ?? false,
                     },
                     { signal: ac.signal }
                 );
+
                 setText("");
-                onSuccess?.();
-                navigate(-1); // 수정: 새 글 작성 성공 시 이전 페이지(게시판)로 이동
-            } else {                 // props.mode === "reply"  // 수정: 댓글 작성 분기
-                const { postId, onSuccess, } = props;
+                props.onSuccess?.();
+                navigate(-1);
+            } else {
+                const { postId } = props;
                 if (postId === undefined || postId === null || postId === "") {
-                    console.warn("postId가 없습니다."); // 수정: 가드
+                    console.warn("postId가 없습니다.");
                     return;
                 }
                 await createReplyApi(
@@ -71,10 +88,11 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
                     { signal: ac.signal }
                 );
                 setText("");
-                onSuccess?.(); // 댓글은 페이지 이동 없음(현재 화면 유지)
+                props.onSuccess?.();
             }
         } catch (err) {
             console.error(err);
+            props.onError?.(err);                                            // 수정
         } finally {
             setLoading(false);
         }
@@ -89,7 +107,7 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
     };
 
     useEffect(() => {
-        return () => abortRef.current?.abort(); // 수정: 언마운트 시 요청 취소
+        return () => abortRef.current?.abort();
     }, []);
 
     return (
@@ -114,12 +132,12 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
                 <button
                     type="button"
                     onClick={handleSend}
-                    disabled={!hasText || loading} // 수정
+                    disabled={!hasText || loading}
                     className="absolute right-[20px] top-1/2 -translate-y-1/2 h-[20px] w-[20px] opacity-100 disabled:opacity-40"
                 >
                     <img src={hasText ? Export : Clip} alt="전송" />
                 </button>
             </div>
         </div>
-    )
+    );
 }

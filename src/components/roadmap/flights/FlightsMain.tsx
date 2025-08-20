@@ -10,7 +10,7 @@ type PickItem = { name: string; hashtags: string[] };
 const countryMap: Record<string, { code: string; slug: string }> = {
   "United States of America": { code: "US", slug: "usa" },
   USA: { code: "US", slug: "usa" },
-  China: { code: "CN", slug: "chn" },
+  China: { code: "CH", slug: "chn" },
   Japan: { code: "JP", slug: "jpn" },
   Canada: { code: "CA", slug: "cnd" },
 };
