@@ -1,7 +1,7 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
-import { fetchPostRepliesApi } from "../../api";
+import { fetchPostRepliesApi, getPostDetailApi } from "../../api";
 
 import CategoryHeader from "../../components/community/category/CategoryHeader"
 import CommunityPostCard from "../../components/community/CommunityPostCard"
@@ -14,7 +14,9 @@ export default function CommunityPost() {
     const location = useLocation();
 
     const seedPost = location.state?.post as PostDetail | undefined;
-    const [post] = useState<PostDetail | null>(seedPost ?? null);
+    const [post, setPost] = useState<PostDetail | null>(seedPost ?? null);
+    const [loadingPost, setLoadingPost] = useState(!seedPost);
+    const [postError, setPostError] = useState<string | null>(null);
 
     type ReplyItem = {
         id: number | string;
@@ -27,6 +29,33 @@ export default function CommunityPost() {
     const [replies, setReplies] = useState<ReplyItem[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(true);
     const [replyError, setReplyError] = useState<string | null>(null);
+    useEffect(() => {
+        if (seedPost) return;
+        if (!postId) return;
+        let cancelled = false;
+        const controller = new AbortController();
+
+        (async () => {
+            try {
+                setLoadingPost(true);
+                setPostError(null);
+                const detail = await getPostDetailApi(
+                    postId,
+                    { signal: controller.signal }
+                );
+                if (!cancelled) setPost(detail);
+            } catch (e) {
+                if (!cancelled) setPostError("게시글을 불러오지 못했습니다.");
+            } finally {
+                if (!cancelled) setLoadingPost(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+            controller.abort();
+        };
+    }, [postId, seedPost]);
 
     // 댓글 로드(API 호출 → 배열을 PostComment로 반복 렌더)
     useEffect(() => {
@@ -85,6 +114,8 @@ export default function CommunityPost() {
         };
     }, [post]);
 
+    if (loadingPost) return <p className="text-sm text-[#98A2B3]">게시글 불러오는 중…</p>;
+    if (postError) return <p className="text-sm text-red-500">{postError}</p>;
     if (!post) return <p>게시글을 찾을 수 없습니다.</p>;
     return (
         <div className="flex flex-col items-center">

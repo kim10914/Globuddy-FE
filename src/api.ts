@@ -194,15 +194,15 @@ export async function createPostApi(
   options?: { signal?: AbortSignal }
 ): Promise<PostDetail> {
   // 필수값 가드
-  if (!body?.content || typeof body.categoryId !== "number") { 
-    throw new Error("content, categoryId는 필수입니다."); 
+  if (!body?.content || typeof body.categoryId !== "number") {
+    throw new Error("content, categoryId는 필수입니다.");
   }
 
   // 서버로는 country를 항상 null로 보냄
   const payload = {
     ...body,
     country: null,
-    hashtag : null,
+    hashtag: null,
   };
 
   const res = await retryRequest(() =>
@@ -513,13 +513,34 @@ export async function fetchPostRepliesApi<T = unknown>(
   options?: { signal?: AbortSignal }
 ): Promise<T> {
   if (postId === undefined || postId === null || postId === "") {
-    throw new Error("postId는 필수입니다."); // [추가]
+    throw new Error("postId는 필수입니다.");
   }
   const res = await retryRequest(() =>
     apiClient.get(`/posts/${postId}/replies/view`, { signal: options?.signal })
   );
   if (res.status !== 200) {
-    throw new Error(`Fetch replies failed (status: ${res.status})`); // [추가]
+    throw new Error(`Fetch replies failed (status: ${res.status})`);
   }
-  return res.data as T; // [추가]
+  return res.data as T;
+}
+
+export async function getPostDetailApi(
+  postId: number | string,
+  options?: { signal?: AbortSignal }
+): Promise<PostDetail> {
+  // 가드: 숫자 ID만 허용 (스웨거: integer path)
+  const idNum = typeof postId === "number" ? postId : Number(postId);
+  if (!Number.isInteger(idNum) || idNum <= 0) {
+    throw new Error("유효한 postId가 아닙니다.");
+  }
+
+  const res = await retryRequest(() =>
+    apiClient.get(`/posts/${idNum}`, { signal: options?.signal })
+  );
+
+  if (res.status !== 200) {
+    throw new Error(`Get post failed (status: ${res.status})`);
+  }
+
+  return normalizePost(res.data);
 }
