@@ -41,7 +41,7 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
             abortRef.current = ac;
 
             if (props.mode === "post") { // 수정: 새 글 작성 분기
-                const { categoryId, country, onSuccess, onError } = props;
+                const { categoryId, country, onSuccess, } = props;
                 if (typeof categoryId !== "number" || !country?.trim()) {
                     console.warn("categoryId/country가 없습니다."); // 수정: 가드
                     return;
@@ -57,7 +57,7 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
                 onSuccess?.();
                 navigate(-1); // 수정: 새 글 작성 성공 시 이전 페이지(게시판)로 이동
             } else {                 // props.mode === "reply"  // 수정: 댓글 작성 분기
-                const { postId, onSuccess, onError } = props;
+                const { postId, onSuccess, } = props;
                 if (postId === undefined || postId === null || postId === "") {
                     console.warn("postId가 없습니다."); // 수정: 가드
                     return;
@@ -75,7 +75,6 @@ export default function PostFooter(props: PostFooterProps) {   // 수정
             }
         } catch (err) {
             console.error(err);
-            props.onError?.(err); // 수정: 상위로 에러 전달
         } finally {
             setLoading(false);
         }
