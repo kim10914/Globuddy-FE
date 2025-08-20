@@ -19,11 +19,9 @@ import { useEffect, useState } from "react";
 import RedirectIfAuth from "./pages/RedirectIfAuth";
 
 function App() {
-  function isLoggedIn() {
-    const token = localStorage.getItem("accessToken");
-    return !!token;
-  }
   const [showSplash, setShowSplash] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem("splashShown");
@@ -37,13 +35,20 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, []);
-  if (showSplash) return <LoadingPage />;
+  // 토큰 확인
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setLoggedIn(!!token);
+    setCheckingAuth(false);
+  }, []);
+
+  if (showSplash || checkingAuth) return <LoadingPage />;
 
   return (
     <Routes>
       <Route
         path="/"
-        element={isLoggedIn() ? <MainPage /> : <Navigate to="/login" replace />}
+        element={loggedIn ? <MainPage /> : <Navigate to="/login" replace />}
       />
       <Route path="/loading" element={<LoadingPage />} />
       <Route
@@ -60,7 +65,7 @@ function App() {
 
       <Route
         path="/*"
-        element={isLoggedIn() ? <Outlet /> : <Navigate to="/login" replace />}
+        element={loggedIn ? <Outlet /> : <Navigate to="/login" replace />}
       >
         <Route path="profile" element={<ProfilePage />}></Route>
         <Route path="profile/setting" element={<SettingPage />}></Route>
