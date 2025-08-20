@@ -1,17 +1,34 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getRoadmapByIdApi } from "../../../api";
-import type { PatchRoadmapByIdResponse } from "../../../types";
+import { getRoadmapByIdApi, patchRoadmapVisaApi } from "../../../api";
+import type { PatchRoadmapByIdResponse, PatchRoadmapVisaResponse } from "../../../types";
 import NonCheck from '../../../assets/generic/선택.svg'
 import GoHomeModal from "./GoHomeModal";
 
+// 국가 슬러그를 코드로 매핑하는 객체를 추가 (예시)
+const COUNTRY_SLUG_TO_CODE: Record<string, string> = {
+    usa: "US",
+    chn: "CN",
+    jpn: "JP",
+    cnd: "CA",
+    // 필요에 따라 추가
+};
+
 /** 서버가 visaId 직접 제공하지 않으면 사용 */
 const VISA_ID_MAP: Record<string, Record<string, number>> = {
-    usa: { "ESTA": 101, "F-1": 102, "J-1": 103, "H-1B": 104 },
-    chn: { "L": 201, "Z": 202, "X": 203 },
-    jpn: { "유학": 301, "문화활동": 302, "특정활동": 303, "기술·인문지식·국제업무": 304, "특정기능": 305 },
-    cnd: { "e-TA": 401, "Study Permit": 402, "Work Permit": 403, "Co-op Permit": 404 },
+    usa: { ESTA: 1, "F-1": 2, "J-1": 3, "H-1B": 4 },
+    chn: { L: 5, Z: 6, X: 7 },
+    jpn: { "유학": 8, "문화활동": 9, "특정활동": 10, "기술·인문지식·국제업무": 11, "특정기능": 12 },
+    cnd: { "e-TA": 13, "Study Permit": 14, "Work Permit": 15, "Co-op Permit": 16 },
 };
+
+const toSlug = (s: string) =>
+    s
+        .normalize("NFC")
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/(^-|-$)+/g, "");
 
 export default function VisaInfoMain() {
     const [open, setOpen] = useState(false);
@@ -20,11 +37,10 @@ export default function VisaInfoMain() {
     const visaCode = sp.get("visa") ?? "";
     const visaLabel = (sp.get("label") ?? visaCode) || "Visa";
 
-    const resolvedVisaId = VISA_ID_MAP[country]?.[visaCode];
-
     const [data, setData] = useState<PatchRoadmapByIdResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState<string | null>(null);
+    const labelParam = sp.get("label") ?? "";
 
     // 문자열 내 URL을 자동 링크로 바꾸어 렌더링
     const renderWithLinks = (text: string) => {
@@ -66,7 +82,6 @@ export default function VisaInfoMain() {
         const load = async () => {
             setLoading(true);
 
-            // [수정] 필수 파라미터/매핑 누락이면 에러 표시
             if (!country || !visaCode) {
                 if (alive) {
                     setErr("country 또는 visa 파라미터가 없습니다.");
@@ -75,25 +90,82 @@ export default function VisaInfoMain() {
                 }
                 return;
             }
-            if (!resolvedVisaId) {
-                if (alive) {
-                    setErr("해당 비자 정보를 찾을 수 없습니다.");
-                    setData(null);
-                    setLoading(false);
-                }
-                return;
-            }
 
             try {
-                const res = await getRoadmapByIdApi(resolvedVisaId, { signal: controller.signal });
+                // 0) visa가 숫자면 ID로 직접 사용
+                let visaId: number | undefined = undefined;
+                const numericId = Number(visaCode);
+                if (Number.isInteger(numericId) && numericId > 0) {
+                    visaId = numericId;
+                }
+
+
+                // 1) 숫자가 아니면 라벨(or visa 문자열)로 매핑 시도
+                //    - labelParam이 있으면 우선 사용
+                if (!visaId) {
+                    const keyForName = (labelParam || visaCode);
+                    visaId =
+                        VISA_ID_MAP[country]?.[keyForName] ??
+                        VISA_ID_MAP[country]?.[keyForName.toUpperCase()] ??
+                        undefined;
+                }
+
+                // 2) 그래도 못 찾으면 서버 목록에서 
+                if (!visaId) {                                     // 수정
+                    const countryCode = COUNTRY_SLUG_TO_CODE[country];
+                    if (!countryCode) {
+                        if (alive) {
+                            setErr("지원하지 않는 국가입니다.");
+                            setData(null);
+                            setLoading(false);
+                        }
+                        return;
+                    }
+
+                    const raw: PatchRoadmapVisaResponse = await patchRoadmapVisaApi(
+                        { country: countryCode },
+                        { signal: controller.signal }
+                    );
+
+                    type VisaBrief = { id: number; visaName: string };
+                    let list: VisaBrief[] = [];
+                    if (Array.isArray(raw)) {
+                        list = raw as unknown as VisaBrief[];
+                    } else if (Array.isArray((raw as any)?.items)) {
+                        list = (raw as any).items as VisaBrief[];
+                    } else if (Array.isArray((raw as any)?.visas)) {
+                        list = (raw as any).visas as VisaBrief[];
+                    }
+
+                    const keyForName = (labelParam || visaCode);     // 서버 매칭에도 동일 키 사용
+                    const wanted = toSlug(keyForName);
+                    const found = list.find(
+                        (v) => toSlug(v.visaName) === wanted || v.visaName === keyForName
+                    );
+                    visaId = found?.id;
+                }
+
+                // 최종 가드
+                if (typeof visaId !== "number") {
+                    if (alive) {
+                        setErr("해당 비자 정보를 찾을 수 없습니다.");
+                        setData(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                // 3) 상세 조회
+                const res = await getRoadmapByIdApi(visaId, { signal: controller.signal });
                 if (!alive) return;
                 setData(res);
                 setErr(null);
             } catch (e) {
                 console.error("[VisaInfoMain] fetch failed:", e);
-                if (!alive) return;
-                setData(null);
-                setErr("비자 정보를 불러오지 못했습니다.");
+                if (alive) {
+                    setData(null);
+                    setErr("비자 정보를 불러오지 못했습니다.");
+                }
             } finally {
                 if (alive) setLoading(false);
             }
@@ -104,12 +176,11 @@ export default function VisaInfoMain() {
             alive = false;
             controller.abort();
         };
-    }, [country, visaCode, resolvedVisaId]);
-    
+    }, [country, visaCode, labelParam]);
+
     const checklist = useMemo(() => {
         if (!data) return [];
         const flat = data.section2.flatMap((s) => s.content);
-        // 중복 제거
         return Array.from(new Set(flat));
     }, [data]);
 
