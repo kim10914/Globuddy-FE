@@ -41,10 +41,6 @@ function App() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={isLoggedIn() ? <MainPage /> : <Navigate to="/login" replace />}
-      />
       <Route path="/loading" element={<LoadingPage />} />
       <Route
         path="/login"
@@ -58,23 +54,29 @@ function App() {
       <Route path="/oauth/google/redirect" element={<AuthCallbackPage />} />
       <Route path="/oauth/kakao/redirect" element={<AuthCallbackPage />} />
 
+      {/* 보호 레이아웃 */}
       <Route
-        path="/*"
+        path="/"
         element={isLoggedIn() ? <Outlet /> : <Navigate to="/login" replace />}
       >
-        <Route path="/" element={<MainPage />} />
-        <Route path="/profile" element={<ProfilePage />}></Route>
-        <Route path="/profile/setting" element={<SettingPage />}></Route>
-        <Route path="/community" element={<Community />} />
-        <Route path="/board/:category" element={<CommunityCategory />} />
-        <Route path="/board/:category/:postId" element={<CommunityPost />} />
-        <Route path="/board/:category/write" element={<CommunityWrite />} />
-        <Route path="/board/:category/mine" element={<CommunityMyPost />} />
-        <Route path="/road-map" element={<RoadmapFlights />} />
-        <Route path="/visa/:country" element={<VisaSearch />} />
-        <Route path="/road-map/write" element={<VisaInfo />} />
-        <Route path="/profile/notifications" element={<NotificationsPage />} />
+        <Route index element={<MainPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile/setting" element={<SettingPage />} />
+        <Route path="profile/notifications" element={<NotificationsPage />} />
+
+        <Route path="community" element={<Community />} />
+        <Route path="board/:category" element={<CommunityCategory />} />
+        <Route path="board/:category/write" element={<CommunityWrite />} />
+        <Route path="board/:category/mine" element={<CommunityMyPost />} />
+        <Route path="board/:category/:postId" element={<CommunityPost />} />
+
+        <Route path="road-map" element={<RoadmapFlights />} />
+        <Route path="visa/:country" element={<VisaSearch />} />
+        <Route path="road-map/write" element={<VisaInfo />} />
       </Route>
+
+      {/* 알 수 없는 경로 처리 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
