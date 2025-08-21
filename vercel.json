@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://spring.jinwook.shop/$1" }, 
     { "source": "/(.*)", "destination": "/" }
   ]
 }
